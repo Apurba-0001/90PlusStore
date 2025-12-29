@@ -1,46 +1,72 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please provide a product name"],
+      required: [true, "Please provide product name"],
       trim: true,
-      maxlength: [100, "Product name cannot exceed 100 characters"],
     },
     description: {
       type: String,
-      required: [true, "Please provide a product description"],
-      maxlength: [1000, "Description cannot exceed 1000 characters"],
-    },
-    category: {
-      type: String,
-      enum: ["jerseys", "boots", "balls", "accessories"],
-      required: [true, "Please select a category"],
+      required: [true, "Please provide product description"],
     },
     price: {
       type: Number,
-      required: [true, "Please provide a price"],
-      min: [0, "Price cannot be negative"],
+      required: [true, "Please provide product price"],
+      min: 0,
     },
-    image: {
+    category: {
       type: String,
-      required: [true, "Please provide a product image URL"],
+      enum: [
+        "Jerseys",
+        "Jackets and Sweatshirts",
+        "Footwear",
+        "Shorts",
+        "Tracksuits",
+        "Special Collectibles",
+      ],
+      required: [true, "Please select a category"],
     },
-    sizes: [
+    gender: {
+      type: String,
+      enum: ["Men", "Women", "Kids"],
+      default: "Men",
+    },
+    availableSizes: [
       {
-        size: {
-          type: String,
-          required: true,
-        },
-        stock: {
-          type: Number,
-          required: true,
-          default: 0,
-          min: 0,
-        },
+        type: String,
+        enum: [
+          "XS",
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+        ],
       },
     ],
+    images: [
+      {
+        url: String,
+        alt: String,
+      },
+    ],
+    stock: {
+      type: Number,
+      required: [true, "Please provide stock quantity"],
+      default: 0,
+      min: 0,
+    },
     rating: {
       type: Number,
       default: 0,
@@ -49,10 +75,8 @@ const productSchema = new mongoose.Schema(
     },
     reviews: [
       {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
+        userId: mongoose.Schema.Types.ObjectId,
+        userName: String,
         rating: Number,
         comment: String,
         createdAt: {
@@ -61,23 +85,18 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
-    isActive: {
+    brand: String,
+    sku: String,
+    isFeatured: {
       type: Boolean,
-      default: true,
+      default: false,
     },
-    sku: {
-      type: String,
-      unique: true,
-      required: true,
+    createdAt: {
+      type: Date,
+      default: Date.now,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Index for faster searches
-productSchema.index({ name: "text", description: "text" });
-productSchema.index({ category: 1 });
-
-module.exports = mongoose.model("Product", productSchema);
+export default mongoose.model("Product", productSchema);
