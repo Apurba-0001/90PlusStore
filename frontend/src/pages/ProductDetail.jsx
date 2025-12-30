@@ -5,6 +5,8 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import StarRating from "../components/StarRating";
 
+const minSwipeDistance = 50;
+
 export default function ProductDetail() {
   const { id } = useParams();
   const { addToCart } = useCart();
@@ -22,6 +24,7 @@ export default function ProductDetail() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
+  const [sizeError, setSizeError] = useState("");
 
   // Categories that require size selection (all except Collectibles)
   const requiresSize =
@@ -119,12 +122,16 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (requiresSize && !selectedSize) {
-      alert("Please select a size before adding to cart");
+      setSizeError("⚠️ Please select a size before adding to cart");
+      setTimeout(() => setSizeError(""), 3000);
       return;
     }
+    setSizeError("");
     addToCart(product, quantity, selectedSize || null);
     setSelectedSize("");
-    alert("Product added to cart!");
+    if (user?.isAdmin) {
+      alert("✓ Product added to cart!");
+    }
   };
 
   const handleAddToWishlist = async () => {
@@ -135,11 +142,9 @@ export default function ProductDetail() {
       if (isInWishlist) {
         wishlist = wishlist.filter((productId) => productId !== id);
         setIsInWishlist(false);
-        alert("Removed from wishlist!");
       } else {
         wishlist.push(id);
         setIsInWishlist(true);
-        alert("Added to wishlist!");
       }
 
       localStorage.setItem("wishlist", JSON.stringify(wishlist));
@@ -148,10 +153,14 @@ export default function ProductDetail() {
       try {
         const response = await authService.toggleWishlist(id);
         setIsInWishlist(!isInWishlist);
-        alert(response.data.message);
+        if (user?.isAdmin) {
+          alert(response.data.message);
+        }
       } catch (error) {
         console.error("Error toggling wishlist:", error);
-        alert("Error updating wishlist");
+        if (user?.isAdmin) {
+          alert("Error updating wishlist");
+        }
       }
     }
   };
@@ -160,12 +169,16 @@ export default function ProductDetail() {
     e.preventDefault();
 
     if (!user) {
-      alert("Please login to submit a review");
+      if (user?.isAdmin) {
+        alert("Please login to submit a review");
+      }
       return;
     }
 
     if (newRating === 0) {
-      alert("Please select a rating");
+      if (user?.isAdmin) {
+        alert("Please select a rating");
+      }
       return;
     }
 
@@ -184,14 +197,18 @@ export default function ProductDetail() {
       // Reset form
       setNewRating(0);
       setNewComment("");
-      alert("Review submitted successfully!");
+      if (user?.isAdmin) {
+        alert("Review submitted successfully!");
+      }
     } catch (error) {
       console.error("Error submitting review:", error);
       // Check if error is about duplicate review
-      if (error.response?.data?.message?.includes("already reviewed")) {
-        alert(error.response.data.message);
-      } else {
-        alert("Error submitting review. Please try again.");
+      if (user?.isAdmin) {
+        if (error.response?.data?.message?.includes("already reviewed")) {
+          alert(error.response.data.message);
+        } else {
+          alert("Error submitting review. Please try again.");
+        }
       }
     } finally {
       setSubmittingReview(false);
@@ -228,6 +245,33 @@ export default function ProductDetail() {
                   className="w-full h-full object-cover select-none"
                   draggable="false"
                 />
+
+                {/* Wishlist Heart Button */}
+                <button
+                  onClick={handleAddToWishlist}
+                  className="absolute bottom-4 right-4 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition transform hover:scale-110"
+                  aria-label={
+                    isInWishlist ? "Remove from wishlist" : "Add to wishlist"
+                  }
+                >
+                  <svg
+                    className={`w-6 h-6 transition ${
+                      isInWishlist
+                        ? "text-red-600 fill-current"
+                        : "text-gray-400"
+                    }`}
+                    fill={isInWishlist ? "currentColor" : "none"}
+                    stroke={isInWishlist ? "none" : "currentColor"}
+                    viewBox="0 0 24 24"
+                    strokeWidth={isInWishlist ? "0" : "2"}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                    />
+                  </svg>
+                </button>
 
                 {/* Navigation Arrows (only show if multiple images) */}
                 {product.images.length > 1 && (
@@ -365,6 +409,117 @@ export default function ProductDetail() {
             </p>
           )}
 
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-end justify-between gap-4">
+                <div className="flex-1">
+                  <label className="block font-bold text-lg mb-2">
+                    Quantity
+                  </label>
+                  <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden w-fit bg-white">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                      className="px-4 sm:px-5 py-2 hover:bg-blue-100 transition font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        setQuantity(
+                          Math.min(Math.max(1, value), product.stock)
+                        );
+                      }}
+                      max={product.stock}
+                      min="1"
+                      className="w-20 text-center border-l-2 border-r-2 border-gray-300 py-2 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={() =>
+                        setQuantity(Math.min(quantity + 1, product.stock))
+                      }
+                      disabled={quantity >= product.stock}
+                      className="px-4 sm:px-5 py-2 hover:bg-blue-100 transition font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Max available: {product.stock}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600 mb-1">Total Price:</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                    ₹{(product.price * quantity).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Size Selector (only for products that require size) */}
+          {requiresSize && (
+            <div
+              className={`mb-6 p-4 rounded-lg border ${
+                sizeError
+                  ? "bg-red-50 border-red-300"
+                  : "bg-gray-50 border-gray-200"
+              }`}
+            >
+              <h3 className="font-bold text-lg mb-4">
+                Select Size {product?.category === "Footwear" && "(UK)"}{" "}
+                <span className="text-red-600">*</span>
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {getAllSizeOptions().map((size) => {
+                  const available = isAvailable(size);
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => {
+                        available && setSelectedSize(size);
+                        setSizeError("");
+                      }}
+                      disabled={!available}
+                      className={`px-3 py-2 rounded font-semibold transition ${
+                        !available
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : selectedSize === size
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-800 border border-gray-300 hover:border-blue-600 hover:bg-blue-50 cursor-pointer"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
+              </div>
+              {sizeError && (
+                <p className="text-red-600 font-semibold mt-3 text-sm">
+                  {sizeError}
+                </p>
+              )}
+              {product?.availableSizes && product.availableSizes.length > 0 && (
+                <p className="text-xs text-gray-500 mt-3">
+                  Available sizes shown in white. Out of stock sizes are grayed
+                  out.
+                </p>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition disabled:bg-gray-400 mb-4 text-sm sm:text-base"
+          >
+            Add to Cart
+          </button>
+
           {/* Reviews Section */}
           <div className="mt-12">
             <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
@@ -447,86 +602,6 @@ export default function ProductDetail() {
               )}
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex items-center border border-gray-300 rounded">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-3 sm:px-4 py-2 hover:bg-gray-200 text-lg"
-              >
-                −
-              </button>
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                }
-                className="w-16 text-center border-l border-r py-2"
-              />
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="px-3 sm:px-4 py-2 hover:bg-gray-200 text-lg"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Size Selector (only for products that require size) */}
-          {requiresSize && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-bold text-lg mb-4">
-                Select Size {product?.category === "Footwear" && "(UK)"}
-              </h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {getAllSizeOptions().map((size) => {
-                  const available = isAvailable(size);
-                  return (
-                    <button
-                      key={size}
-                      onClick={() => available && setSelectedSize(size)}
-                      disabled={!available}
-                      className={`px-3 py-2 rounded font-semibold transition ${
-                        !available
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : selectedSize === size
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-gray-800 border border-gray-300 hover:border-blue-600 hover:bg-blue-50 cursor-pointer"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-              {product?.availableSizes && product.availableSizes.length > 0 && (
-                <p className="text-xs text-gray-500 mt-3">
-                  Available sizes shown in white. Out of stock sizes are grayed
-                  out.
-                </p>
-              )}
-            </div>
-          )}
-
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition disabled:bg-gray-400 mb-4 text-sm sm:text-base"
-          >
-            Add to Cart
-          </button>
-
-          <button
-            onClick={handleAddToWishlist}
-            className={`w-full py-3 rounded-lg font-bold transition text-sm sm:text-base ${
-              isInWishlist
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-gray-600 text-white hover:bg-gray-700"
-            }`}
-          >
-            {isInWishlist ? "❤️ Remove from Wishlist" : "♡ Add to Wishlist"}
-          </button>
         </div>
       </div>
     </div>

@@ -189,7 +189,9 @@ export default function Checkout() {
       };
 
       const response = await orderService.createOrder(orderData);
-      alert("Order placed successfully!");
+      if (user?.isAdmin) {
+        alert("Order placed successfully!");
+      }
       clearCart();
       navigate("/profile");
     } catch (err) {

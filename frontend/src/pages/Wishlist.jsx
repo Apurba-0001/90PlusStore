@@ -72,7 +72,9 @@ export default function Wishlist() {
       setWishlistProducts(wishlistProducts.filter((p) => p._id !== productId));
     } catch (error) {
       console.error("Error removing from wishlist:", error);
-      alert("Error removing from wishlist");
+      if (user?.isAdmin) {
+        alert("Error removing from wishlist");
+      }
     }
   };
 

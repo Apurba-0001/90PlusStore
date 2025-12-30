@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import StarRating from "./StarRating";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({
+  product,
+  hideAddToCart = false,
+  isFeatured = false,
+}) {
   const { addToCart } = useCart();
 
   const handleAddToCart = (e) => {
@@ -34,32 +38,58 @@ export default function ProductCard({ product }) {
             </div>
           )}
         </div>
-        <div className="p-3">
-          <h3 className="font-bold text-base mb-1.5 line-clamp-2">
+        <div className={isFeatured ? "p-4" : "p-3"}>
+          <h3
+            className={`font-bold ${
+              isFeatured ? "text-lg" : "text-base"
+            } mb-1.5 line-clamp-2`}
+          >
             {product.name}
           </h3>
-          <p className="text-gray-600 text-sm mb-1.5">{product.category}</p>
+          <p
+            className={`text-gray-600 ${
+              isFeatured ? "text-base" : "text-sm"
+            } mb-1.5`}
+          >
+            {product.category}
+          </p>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <StarRating rating={product.rating || 0} readonly={true} />
-            <span className="text-sm text-gray-600">
+            <StarRating
+              rating={product.rating || 0}
+              readonly={true}
+              size={isFeatured ? "large" : "default"}
+            />
+            <span
+              className={`text-gray-600 ${
+                isFeatured ? "text-base" : "text-sm"
+              }`}
+            >
               ({product.reviews?.length || 0})
             </span>
           </div>
           <div className="flex justify-between items-center mb-3">
-            <span className="text-xl font-bold text-blue-600">
+            <span
+              className={`font-bold text-blue-600 ${
+                isFeatured ? "text-2xl" : "text-xl"
+              }`}
+            >
               ₹{product.price}
             </span>
-            <span className="text-sm text-gray-500">
+            <span
+              className={`text-gray-500 ${isFeatured ? "text-sm" : "text-sm"}`}
+            >
               {product.stock} in stock
             </span>
           </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full bg-blue-600 text-white py-1.5 text-base rounded hover:bg-blue-700 transition disabled:bg-gray-400"
-          >
-            Add to Cart
-          </button>
+          {!hideAddToCart && (
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="w-full bg-blue-600 text-white py-1.5 text-base rounded hover:bg-blue-700 transition disabled:bg-gray-400"
+            >
+              Add to Cart
+            </button>
+          )}
         </div>
       </div>
     </Link>
