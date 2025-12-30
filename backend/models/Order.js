@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
-        productId: {
+        productObjectId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
@@ -23,6 +23,7 @@ const orderSchema = new mongoose.Schema(
         },
         image: String,
         size: String,
+        productId: String,
       },
     ],
     totalPrice: {
@@ -31,6 +32,7 @@ const orderSchema = new mongoose.Schema(
       min: 0,
     },
     shippingAddress: {
+      houseNo: String,
       street: String,
       city: String,
       state: String,
@@ -38,6 +40,22 @@ const orderSchema = new mongoose.Schema(
       zipCode: String,
       countryCode: String,
       mobile: String,
+      shippingType: String,
+    },
+    billingAddress: {
+      houseNo: String,
+      street: String,
+      city: String,
+      state: String,
+      country: String,
+      zipCode: String,
+    },
+    paymentDetails: {
+      cardHolderName: String,
+      cardNumber: String,
+      expiryDate: String,
+      cvv: String,
+      upiId: String,
     },
     status: {
       type: String,

@@ -14,7 +14,7 @@ export default function AdminProductForm() {
     category: "Jerseys",
     stock: "",
     brand: "",
-    sku: "",
+    productId: "",
     availableSizes: ["M", "L", "XL"],
     images: [{ url: "", alt: "" }],
   });
@@ -191,6 +191,7 @@ export default function AdminProductForm() {
               <option>Shorts</option>
               <option>Tracksuits</option>
               <option>Special Collectibles</option>
+              <option>Accessories</option>
             </select>
           </div>
         </div>
@@ -242,8 +243,8 @@ export default function AdminProductForm() {
             </label>
             <input
               type="text"
-              name="sku"
-              value={formData.sku}
+              name="productId"
+              value={formData.productId}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-600"
             />

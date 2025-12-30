@@ -36,11 +36,17 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     address: {
+      houseNo: String,
       street: String,
       city: String,
       state: String,
       country: String,
       zipCode: String,
+      countryCode: {
+        type: String,
+        default: "+91",
+      },
+      phone: String,
     },
     cart: [
       {

@@ -1,14 +1,39 @@
+### Node & Package
 node_modules/
-.env
-.env.local
-dist/
-.DS_Store
-*.log
-.vite
-.idea
-.vscode
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Package lock files
+### Build Output
+frontend/dist/
+backend/build/
+dist/
+.vite
+.cache/
+
+### Env/Secrets
+.env*
+.env.local
+.env.production
+
+### Editor/OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+### Test/Coverage
+coverage/
+.nyc_output/
+
+### Lock files (optional: keep only one if needed)
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+### Misc
+.eslintcache
+.stylelintcache
+.svelte-kit/
+.next/
+.vercel/

@@ -12,7 +12,9 @@ export const register = async (req, res) => {
         .json({ message: "Please provide all required fields" });
     }
 
-    let user = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    let user = await User.findOne({ email: normalizedEmail });
     if (user) {
       return res.status(400).json({ message: "Email already registered" });
     }
@@ -22,7 +24,7 @@ export const register = async (req, res) => {
 
     user = new User({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -59,7 +61,11 @@ export const login = async (req, res) => {
         .json({ message: "Please provide email and password" });
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+password"
+    );
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -104,17 +110,52 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, address } = req.body;
+    const { name, phone, address, email } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      { name, phone, address },
-      { new: true, runValidators: true }
-    );
+    // Preserve existing address fields and only update provided ones
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Normalize and update email if changed, ensuring uniqueness
+    if (email && email.trim().toLowerCase() !== user.email) {
+      const normalizedEmail = email.trim().toLowerCase();
+      const existing = await User.findOne({
+        email: normalizedEmail,
+        _id: { $ne: req.userId },
+      });
+      if (existing) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      user.email = normalizedEmail;
+    }
+
+    user.name = name ?? user.name;
+    user.phone = phone ?? user.phone;
+
+    // Merge nested address, keeping previous values when not supplied
+    if (address && typeof address === "object") {
+      user.address = {
+        ...user.address,
+        ...address,
+        // Also mirror phone into address.phone if provided for compatibility
+        phone: address.phone ?? address.mobile ?? user.address?.phone,
+      };
+    }
+
+    await user.save();
 
     res.json({
       message: "Profile updated successfully",
-      user,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        isAdmin: user.isAdmin,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

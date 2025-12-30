@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { productService } from "../services/services";
 import ProductCard from "../components/ProductCard";
 
 export default function Products() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -22,6 +24,7 @@ export default function Products() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [sortBy, setSortBy] = useState("");
 
   const getAvailableSizes = () => {
     if (selectedCategory === "Footwear") {
@@ -30,6 +33,7 @@ export default function Products() {
     return ["XS", "S", "M", "L", "XL", "XXL"];
   };
 
+  const isAdmin = user?.isAdmin;
   const sizes = getAvailableSizes();
   const genders = ["Men", "Women", "Kids"];
 
@@ -82,6 +86,28 @@ export default function Products() {
           }
         }
 
+        // Apply sorting
+        if (sortBy && sortBy !== "default") {
+          filteredProducts = [...filteredProducts].sort((a, b) => {
+            switch (sortBy) {
+              case "featured":
+                return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+              case "price-low-high":
+                return a.price - b.price;
+              case "price-high-low":
+                return b.price - a.price;
+              case "name-asc":
+                return a.name.localeCompare(b.name);
+              case "name-desc":
+                return b.name.localeCompare(a.name);
+              case "rating":
+                return (b.rating || 0) - (a.rating || 0);
+              default:
+                return 0;
+            }
+          });
+        }
+
         setProducts(filteredProducts);
         setTotalPages(response.data.pagination.pages);
       } catch (err) {
@@ -92,18 +118,23 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, [selectedCategory, search, page, selectedGender, selectedSize]);
+  }, [selectedCategory, search, page, selectedGender, selectedSize, sortBy]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* Categories Section - Hidden when searching */}
       {!search && (
-        <section className="bg-gray-100 py-8 sm:py-12">
+        <section className="bg-gradient-to-br from-gray-100 to-gray-50 py-8 sm:py-12">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">
-              Shop by Category
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                {isAdmin ? "View by Category" : "Shop by Category"}
+              </h2>
+              <p className="text-gray-500 mt-2">
+                Find exactly what you're looking for
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
               {[
                 { name: "Jerseys", emoji: "👕" },
                 { name: "Jackets and Sweatshirts", emoji: "🧥" },
@@ -111,6 +142,7 @@ export default function Products() {
                 { name: "Shorts", emoji: "🩳" },
                 { name: "Tracksuits", emoji: "🏃" },
                 { name: "Special Collectibles", emoji: "⭐" },
+                { name: "Accessories", emoji: "💎" },
               ].map((category) => (
                 <button
                   key={category.name}
@@ -118,16 +150,16 @@ export default function Products() {
                     setSelectedCategory(category.name);
                     setPage(1);
                   }}
-                  className={`bg-white p-4 sm:p-6 rounded-lg text-center hover:shadow-lg transition ${
+                  className={`bg-white p-4 sm:p-6 rounded-2xl text-center hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 ${
                     selectedCategory === category.name
-                      ? "ring-2 ring-blue-600"
-                      : ""
+                      ? "border-blue-500 shadow-lg shadow-blue-500/20"
+                      : "border-transparent hover:border-gray-200"
                   }`}
                 >
                   <div className="text-2xl sm:text-4xl mb-2">
                     {category.emoji}
                   </div>
-                  <h3 className="font-bold text-sm sm:text-base">
+                  <h3 className="font-semibold text-sm sm:text-base text-gray-800">
                     {category.name}
                   </h3>
                 </button>
@@ -138,171 +170,266 @@ export default function Products() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">Products</h1>
-          <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="lg:hidden flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-100"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 p-3 rounded-xl">
+              <svg
+                className="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Products
+            </h1>
+          </div>
+          <div className="flex gap-3 w-full sm:w-auto">
+            {/* Sort Dropdown */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="flex-1 sm:flex-none px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-              />
-            </svg>
-            Filters
-          </button>
+              <option value="">Sort by</option>
+              <option value="default">Default</option>
+              <option value="featured">Featured</option>
+              <option value="price-low-high">Price: Low to High</option>
+              <option value="price-high-low">Price: High to Low</option>
+              <option value="name-asc">Name: A to Z</option>
+              <option value="name-desc">Name: Z to A</option>
+              <option value="rating">Rating: High to Low</option>
+            </select>
+
+            {/* Filter Button */}
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="flex items-center gap-2 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all bg-white"
+            >
+              <svg
+                className="w-5 h-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              Filters
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
-          {/* Sidebar */}
-          <div
-            className={`lg:col-span-1 ${
-              showMobileFilters ? "block" : "hidden"
-            } lg:block`}
-          >
-            <div className="bg-white rounded-lg shadow sticky top-20 overflow-y-auto max-h-screen">
-              {/* Gender Filter */}
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="font-bold mb-4 text-lg">Shop for</h3>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      setSelectedGender("");
+        {/* Floating Filter Panel */}
+        {showMobileFilters && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+              onClick={() => setShowMobileFilters(false)}
+            ></div>
+
+            {/* Floating Filter Tab */}
+            <div className="fixed right-0 top-0 h-screen w-80 bg-white shadow-2xl z-40 overflow-y-auto">
+              {/* Close Button */}
+              <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="font-bold text-lg">Filters</h2>
+                </div>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Filter Content */}
+              <div className="p-4 sm:p-6 space-y-4">
+                {/* Gender Filter */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h3 className="font-semibold mb-3 text-gray-800">Shop for</h3>
+                  <select
+                    value={selectedGender}
+                    onChange={(e) => {
+                      setSelectedGender(e.target.value);
                       setPage(1);
                     }}
-                    className={`block w-full text-left px-4 py-2 rounded text-sm sm:text-base ${
-                      selectedGender === ""
-                        ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-200"
-                    }`}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"
                   >
-                    All
-                  </button>
-                  {genders.map((gender) => (
-                    <button
-                      key={gender}
-                      onClick={() => {
-                        setSelectedGender(gender);
-                        setPage(1);
-                      }}
-                      className={`block w-full text-left px-4 py-2 rounded text-sm sm:text-base ${
-                        selectedGender === gender
-                          ? "bg-blue-600 text-white"
-                          : "hover:bg-gray-200"
-                      }`}
-                    >
-                      {gender}
-                    </button>
-                  ))}
+                    <option value="">All</option>
+                    {genders.map((gender) => (
+                      <option key={gender} value={gender}>
+                        {gender}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
 
-              {/* Size Filter */}
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="font-bold mb-4 text-lg">
-                  Size{selectedCategory === "Footwear" && " (UK)"}
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() =>
-                        setSelectedSize(selectedSize === size ? "" : size)
-                      }
-                      className={`px-3 py-2 rounded text-sm font-semibold transition ${
-                        selectedSize === size
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                {/* Size Filter */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h3 className="font-semibold mb-3 text-gray-800">
+                    Size{selectedCategory === "Footwear" && " (UK)"}
+                  </h3>
+                  <select
+                    value={selectedSize}
+                    onChange={(e) => {
+                      setSelectedSize(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"
+                  >
+                    <option value="">All Sizes</option>
+                    {sizes.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
 
-              {/* Categories Filter */}
-              <div className="p-4 sm:p-6">
-                <h3 className="font-bold mb-4 text-lg">Categories</h3>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => {
-                    setSelectedCategory(e.target.value);
-                    setPage(1);
-                    setShowMobileFilters(false);
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-600"
-                >
-                  <option value="">All Products</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
+                {/* Categories Filter */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h3 className="font-semibold mb-3 text-gray-800">
+                    Categories
+                  </h3>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => {
+                      setSelectedCategory(e.target.value);
+                      setPage(1);
+                      setShowMobileFilters(false);
+                    }}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"
+                  >
+                    <option value="">All Products</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
+          </>
+        )}
 
-          {/* Main content */}
-          <div className="lg:col-span-3">
-            {loading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-12 bg-gray-100 rounded-lg">
-                <p className="text-gray-600">No products found</p>
+        {/* Main content full width */}
+        <div className="w-full">
+          {loading ? (
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
+              <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg
+                  className="w-10 h-10 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  />
+                </svg>
               </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-                  {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
-                  ))}
-                </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                No products found
+              </h2>
+              <p className="text-gray-500">
+                Try adjusting your filters or search criteria.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 md:gap-6 mb-8">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    hideAddToCart={true}
+                  />
+                ))}
+              </div>
 
-                {/* Pagination */}
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="px-3 sm:px-4 py-2 border rounded hover:bg-gray-200 disabled:opacity-50 text-sm sm:text-base"
-                  >
-                    Previous
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`px-3 sm:px-4 py-2 border rounded text-sm sm:text-base ${
-                          page === p
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-200"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    )
-                  )}
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="px-3 sm:px-4 py-2 border rounded hover:bg-gray-200 disabled:opacity-50 text-sm sm:text-base"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+              {/* Pagination */}
+              <div className="flex flex-wrap justify-center gap-2">
+                <button
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`px-4 py-2.5 border-2 rounded-xl text-sm sm:text-base font-medium transition-all ${
+                        page === p
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                )}
+                <button
+                  onClick={() => setPage(Math.min(totalPages, page + 1))}
+                  disabled={page === totalPages}
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

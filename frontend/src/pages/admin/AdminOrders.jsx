@@ -9,6 +9,7 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState(null);
 
+  // Fetch orders on mount and when filters change
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
@@ -28,6 +29,36 @@ export default function AdminOrders() {
 
     fetchOrders();
   }, [status, page]);
+
+  // Listen for order status changes from other tabs or user actions
+  useEffect(() => {
+    const handleOrderStatusChange = (event) => {
+      const { orderId, order } = event.detail;
+      // Update the order in the list
+      setOrders((prevOrders) =>
+        prevOrders.map((o) => (o._id === orderId ? order : o))
+      );
+    };
+
+    const handleStorageChange = () => {
+      const cancelledData = localStorage.getItem("orderCancelled");
+      if (cancelledData) {
+        const { orderId, order } = JSON.parse(cancelledData);
+        // Update the order in the list
+        setOrders((prevOrders) =>
+          prevOrders.map((o) => (o._id === orderId ? order : o))
+        );
+      }
+    };
+
+    window.addEventListener("orderStatusChanged", handleOrderStatusChange);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("orderStatusChanged", handleOrderStatusChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -83,74 +114,112 @@ export default function AdminOrders() {
           <div className="space-y-4">
             {orders.map((order) => (
               <div key={order._id} className="bg-white rounded-lg shadow p-6">
-                <div className="flex justify-between items-center cursor-pointer">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center cursor-pointer">
                   <div
                     onClick={() =>
                       setExpandedOrder(
                         expandedOrder === order._id ? null : order._id
                       )
                     }
+                    className="min-w-0"
                   >
-                    <p className="text-sm text-gray-600">Order ID</p>
-                    <p className="font-bold">{order._id}</p>
+                    <p className="text-sm md:text-xs text-gray-600 font-semibold">
+                      Order ID
+                    </p>
+                    <p className="font-bold text-base md:text-sm truncate">
+                      {order._id}
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Customer</p>
-                    <p className="font-bold">
+                  <div className="min-w-0">
+                    <p className="text-sm md:text-xs text-gray-600 font-semibold">
+                      Customer
+                    </p>
+                    <p className="font-bold text-base md:text-sm truncate">
                       {order.userId?.name || "Unknown"}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total</p>
-                    <p className="font-bold">₹{order.totalPrice.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Date</p>
-                    <p className="font-bold text-sm">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                  <div className="min-w-0">
+                    <p className="text-sm md:text-xs text-gray-600 font-semibold">
+                      Total
+                    </p>
+                    <p className="font-bold text-base md:text-sm">
+                      ₹{order.totalPrice.toFixed(2)}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Sizes</p>
-                    <p className="font-bold text-sm">
-                      {order.products
-                        .filter((p) => p.size)
-                        .map((p) => p.size)
-                        .join(", ") || "—"}
+                  <div className="min-w-0">
+                    <p className="text-sm md:text-xs text-gray-600 font-semibold">
+                      Date
+                    </p>
+                    <p className="font-bold text-base md:text-sm">
+                      {new Date(order.createdAt).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Status</p>
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        handleUpdateStatus(order._id, e.target.value)
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <p className="text-sm md:text-base text-gray-600 font-semibold whitespace-nowrap">
+                        Status:
+                      </p>
+                      <select
+                        value={order.status}
+                        onChange={(e) =>
+                          handleUpdateStatus(order._id, e.target.value)
+                        }
+                        className={`px-4 py-2 rounded-full text-sm md:text-base font-bold border-0 ${
+                          order.status === "delivered"
+                            ? "bg-green-500 md:bg-green-200 text-white md:text-green-800"
+                            : order.status === "cancelled"
+                            ? "bg-red-500 md:bg-red-200 text-white md:text-red-800"
+                            : order.status === "shipped"
+                            ? "bg-blue-500 md:bg-blue-200 text-white md:text-blue-800"
+                            : "bg-yellow-500 md:bg-yellow-200 text-white md:text-yellow-800"
+                        }`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() =>
+                        setExpandedOrder(
+                          expandedOrder === order._id ? null : order._id
+                        )
                       }
-                      className={`px-3 py-1 rounded text-sm font-bold border-0 ${
-                        order.status === "delivered"
-                          ? "bg-green-200 text-green-800"
-                          : order.status === "cancelled"
-                          ? "bg-red-200 text-red-800"
-                          : "bg-yellow-200 text-yellow-800"
-                      }`}
+                      className="text-gray-600 hover:text-blue-600 transition p-2 rounded-md hover:bg-gray-100"
+                      title={
+                        expandedOrder === order._id ? "Collapse" : "Expand"
+                      }
                     >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
+                      {expandedOrder === order._id ? (
+                        <svg
+                          className="w-6 h-6"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M7 14l5-5 5 5z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-6 h-6"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
-                  <button
-                    onClick={() =>
-                      setExpandedOrder(
-                        expandedOrder === order._id ? null : order._id
-                      )
-                    }
-                    className="text-gray-600 hover:text-gray-800 transition"
-                  >
-                    {expandedOrder === order._id ? "▲" : "▼"}
-                  </button>
                 </div>
 
                 {expandedOrder === order._id && (
@@ -168,7 +237,27 @@ export default function AdminOrders() {
                           >
                             <div className="flex-1">
                               <p className="font-semibold">{item.name}</p>
-                              <p className="text-sm text-gray-600">
+                              {item.productId ? (
+                                <p className="text-xs text-gray-600 font-mono mt-1">
+                                  Product ID:{" "}
+                                  <span className="font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                    {item.productId}
+                                  </span>
+                                </p>
+                              ) : item.productObjectId ? (
+                                <p className="text-xs text-gray-600 font-mono mt-1">
+                                  Product ID:{" "}
+                                  <span className="font-bold bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                                    {typeof item.productObjectId === "string"
+                                      ? item.productObjectId.substring(0, 8)
+                                      : item.productObjectId._id?.substring(
+                                          0,
+                                          8
+                                        )}
+                                  </span>
+                                </p>
+                              ) : null}
+                              <p className="text-sm text-gray-600 mt-2">
                                 Quantity:{" "}
                                 <span className="font-semibold">
                                   {item.quantity}
@@ -182,9 +271,7 @@ export default function AdminOrders() {
                                   </span>
                                 </p>
                               )}
-                              <p className="text-sm text-gray-600">
-                                Price: ₹{item.price.toFixed(2)}
-                              </p>
+                              <p className="text-sm text-gray-600"></p>
                             </div>
                             <div className="text-right">
                               <p className="font-bold">
@@ -203,23 +290,31 @@ export default function AdminOrders() {
                           Shipping Address
                         </h3>
                         <div className="bg-gray-50 p-4 rounded border">
-                          <p className="text-sm mb-1">
+                          {order.shippingAddress.houseNo && (
+                            <p className="text-base mb-1 break-words">
+                              <span className="font-semibold">
+                                House No / Building:
+                              </span>{" "}
+                              {order.shippingAddress.houseNo}
+                            </p>
+                          )}
+                          <p className="text-base mb-1 break-words">
                             <span className="font-semibold">Street:</span>{" "}
                             {order.shippingAddress.street}
                           </p>
-                          <p className="text-sm mb-1">
+                          <p className="text-sm mb-1 break-words">
                             <span className="font-semibold">City:</span>{" "}
                             {order.shippingAddress.city}
                           </p>
-                          <p className="text-sm mb-1">
+                          <p className="text-sm mb-1 break-words">
                             <span className="font-semibold">State:</span>{" "}
                             {order.shippingAddress.state}
                           </p>
-                          <p className="text-sm mb-1">
+                          <p className="text-sm mb-1 break-words">
                             <span className="font-semibold">Country:</span>{" "}
                             {order.shippingAddress.country}
                           </p>
-                          <p className="text-sm">
+                          <p className="text-sm break-words">
                             <span className="font-semibold">Zip Code:</span>{" "}
                             {order.shippingAddress.zipCode}
                           </p>
@@ -267,20 +362,20 @@ export default function AdminOrders() {
 
                         {/* Credit Card Details */}
                         {order.paymentMethod === "credit-card" &&
-                          order.shippingAddress?.cardHolderName && (
+                          order.paymentDetails?.cardHolderName && (
                             <div className="bg-white p-3 rounded border border-blue-200">
                               <p className="text-sm mb-2">
                                 <span className="font-semibold">
                                   Card Holder Name:
                                 </span>{" "}
-                                {order.shippingAddress.cardHolderName}
+                                {order.paymentDetails.cardHolderName}
                               </p>
                               <p className="text-sm mb-2">
                                 <span className="font-semibold">
                                   Card Number:
                                 </span>{" "}
-                                {order.shippingAddress.cardNumber?.slice(-4)
-                                  ? `****-****-****-${order.shippingAddress.cardNumber.slice(
+                                {order.paymentDetails.cardNumber?.slice(-4)
+                                  ? `****-****-****-${order.paymentDetails.cardNumber.slice(
                                       -4
                                     )}`
                                   : "Not available"}
@@ -289,7 +384,7 @@ export default function AdminOrders() {
                                 <span className="font-semibold">
                                   Expiry Date:
                                 </span>{" "}
-                                {order.shippingAddress.expiryDate ||
+                                {order.paymentDetails.expiryDate ||
                                   "Not available"}
                               </p>
                               <p className="text-sm text-red-600">
@@ -300,17 +395,17 @@ export default function AdminOrders() {
 
                         {/* UPI Details */}
                         {order.paymentMethod === "upi" &&
-                          order.shippingAddress?.upiId && (
+                          order.paymentDetails?.upiId && (
                             <div className="bg-white p-3 rounded border border-purple-200">
                               <p className="text-sm">
                                 <span className="font-semibold">UPI ID:</span>{" "}
-                                {order.shippingAddress.upiId}
+                                {order.paymentDetails.upiId}
                               </p>
                             </div>
                           )}
 
-                        {!order.shippingAddress?.cardHolderName &&
-                          !order.shippingAddress?.upiId && (
+                        {!order.paymentDetails?.cardHolderName &&
+                          !order.paymentDetails?.upiId && (
                             <p className="text-sm text-gray-500 italic">
                               No payment details available
                             </p>
@@ -357,7 +452,15 @@ export default function AdminOrders() {
                     <div>
                       <p className="text-sm">
                         <span className="font-semibold">Ordered:</span>{" "}
-                        {new Date(order.createdAt).toLocaleString()}
+                        {new Date(order.createdAt).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true,
+                        })}
                       </p>
                     </div>
                   </div>

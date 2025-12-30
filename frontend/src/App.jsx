@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Pages
 import Home from "./pages/Home";
@@ -29,6 +30,7 @@ import AdminFeatured from "./pages/admin/AdminFeatured";
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="flex flex-col h-auto bg-gray-50">
         <Navbar />
         <main className="flex-1">

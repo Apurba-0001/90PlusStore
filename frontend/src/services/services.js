@@ -31,10 +31,12 @@ export const authService = {
 };
 
 export const productService = {
-  getProducts: (category, page, search) =>
+  getProducts: (category, page, search, limit = 10) =>
     apiClient.get("/products", {
-      params: { category, page, search, limit: 10 },
+      params: { category, page, search, limit },
     }),
+
+  getFeaturedProducts: () => apiClient.get("/products/featured"),
 
   getProductById: (id) => apiClient.get(`/products/${id}`),
 
@@ -52,6 +54,13 @@ export const productService = {
   getProductReviews: (id) => apiClient.get(`/products/${id}/reviews`),
   addReview: (id, rating, comment) =>
     apiClient.post(`/products/${id}/reviews`, { rating, comment }),
+  updateReview: (productId, reviewId, rating, comment) =>
+    apiClient.put(`/products/${productId}/reviews/${reviewId}`, {
+      rating,
+      comment,
+    }),
+  deleteReview: (productId, reviewId) =>
+    apiClient.delete(`/products/${productId}/reviews/${reviewId}`),
 };
 
 export const orderService = {
@@ -64,8 +73,18 @@ export const orderService = {
   updateOrderStatus: (id, status) =>
     apiClient.put(`/orders/${id}/status`, { status }),
 
+  updateOrder: (id, data) => apiClient.put(`/orders/${id}`, data),
+
+  cancelOrder: (id) => apiClient.put(`/orders/${id}`, { status: "cancelled" }),
+
   getAllOrders: (status, page) =>
     apiClient.get("/orders/admin/all-orders", {
       params: { status, page, limit: 10 },
     }),
+};
+
+export const settingsService = {
+  getSettings: () => apiClient.get("/settings"),
+
+  updateSettings: (data) => apiClient.put("/settings", data),
 };

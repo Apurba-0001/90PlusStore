@@ -69,10 +69,15 @@ body {
   background: #555;
 }
 
-/* Hide scrollbar utility */
+/* Hide scrollbar utility (cross-browser) */
 .scrollbar-hide {
   -ms-overflow-style: none;
-  scrollbar-width: none;
+}
+
+@supports (scrollbar-width: none) {
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
 }
 
 .scrollbar-hide::-webkit-scrollbar {

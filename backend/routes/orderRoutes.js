@@ -13,6 +13,7 @@ const router = express.Router();
 router.post("/", authMiddleware, createOrder);
 router.get("/my-orders", authMiddleware, getMyOrders);
 router.get("/:id", authMiddleware, getOrderById);
+router.put("/:id", authMiddleware, updateOrderStatus);
 
 // Admin routes
 router.put("/:id/status", authMiddleware, adminMiddleware, updateOrderStatus);

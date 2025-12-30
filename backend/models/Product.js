@@ -25,6 +25,7 @@ const productSchema = new mongoose.Schema(
         "Shorts",
         "Tracksuits",
         "Special Collectibles",
+        "Accessories",
       ],
       required: [true, "Please select a category"],
     },
@@ -86,7 +87,7 @@ const productSchema = new mongoose.Schema(
       },
     ],
     brand: String,
-    sku: String,
+    productId: String,
     isFeatured: {
       type: Boolean,
       default: false,

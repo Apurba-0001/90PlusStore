@@ -17,7 +17,7 @@ export const getAllProducts = async (req, res) => {
         { brand: { $regex: search, $options: "i" } },
         { category: { $regex: search, $options: "i" } },
         { gender: { $regex: search, $options: "i" } },
-        { sku: { $regex: search, $options: "i" } },
+        { productId: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -63,7 +63,7 @@ export const createProduct = async (req, res) => {
       images,
       stock,
       brand,
-      sku,
+      productId,
       gender,
       availableSizes,
     } = req.body;
@@ -84,6 +84,7 @@ export const createProduct = async (req, res) => {
       shorts: "Shorts",
       tracksuits: "Tracksuits",
       "special collectibles": "Special Collectibles",
+      accessories: "Accessories",
     };
 
     const normalizedCategory = categoryMap[category.toLowerCase()] || category;
@@ -96,7 +97,7 @@ export const createProduct = async (req, res) => {
       images: images || [],
       stock: parseInt(stock),
       brand,
-      sku,
+      productId,
       gender: gender || "Men",
       availableSizes: availableSizes || [],
     });
@@ -125,7 +126,7 @@ export const updateProduct = async (req, res) => {
       images,
       stock,
       brand,
-      sku,
+      productId,
       gender,
       availableSizes,
     } = req.body;
@@ -138,6 +139,7 @@ export const updateProduct = async (req, res) => {
       shorts: "Shorts",
       tracksuits: "Tracksuits",
       "special collectibles": "Special Collectibles",
+      accessories: "Accessories",
     };
 
     const normalizedCategory = categoryMap[category.toLowerCase()] || category;
@@ -152,7 +154,7 @@ export const updateProduct = async (req, res) => {
         images,
         stock: parseInt(stock),
         brand,
-        sku,
+        productId,
         gender: gender || "Men",
         availableSizes: availableSizes || [],
       },
@@ -192,6 +194,7 @@ export const getCategories = async (req, res) => {
       "Shirts",
       "Shorts",
       "Special Collectibles",
+      "Accessories",
     ];
     res.json(categories);
   } catch (error) {
@@ -281,6 +284,72 @@ export const getProductReviews = async (req, res) => {
       rating: product.rating,
       reviewCount: product.reviews.length,
       reviews: product.reviews,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const { id: productId, reviewId } = req.params;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res
+        .status(400)
+        .json({ message: "Rating must be between 1 and 5" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    review.rating = parseInt(rating, 10);
+    review.comment = comment || "";
+
+    product.rating = calculateAverageRating(product.reviews);
+    await product.save();
+
+    return res.json({
+      message: "Review updated",
+      review,
+      rating: product.rating,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteReview = async (req, res) => {
+  try {
+    const { id: productId, reviewId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // deleteOne works on subdocuments in modern mongoose
+    await review.deleteOne();
+
+    product.rating = calculateAverageRating(product.reviews);
+    await product.save();
+
+    return res.json({
+      message: "Review deleted",
+      rating: product.rating,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

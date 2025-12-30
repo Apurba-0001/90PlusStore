@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { productService } from "../services/services";
 import ProductCard from "../components/ProductCard";
 
 export default function Home() {
+  const { user } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isAdmin = user?.isAdmin;
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        // Fetch featured products from database
-        const response = await productService.getProducts(null, 1);
-        const allProducts = response.data.products;
-
-        // Filter for featured products (from isFeatured field)
-        const featured = allProducts.filter((product) => product.isFeatured);
-
-        setFeaturedProducts(featured);
+        const response = await productService.getFeaturedProducts();
+        setFeaturedProducts(response.data.products || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -230,46 +227,123 @@ export default function Home() {
           </p>
           <a
             href="/products"
-            className="bg-white text-blue-600 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-bold hover:bg-gray-100 transition transform hover:scale-105 inline-block text-base sm:text-lg shadow-lg"
+            className="bg-white text-blue-600 px-8 sm:px-10 py-3 sm:py-4 rounded-xl font-bold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 inline-flex items-center gap-2 text-base sm:text-lg shadow-xl shadow-blue-900/30"
           >
-            Shop Now
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
+            </svg>
+            {isAdmin ? "View Products" : "Shop Now"}
           </a>
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">
-          Featured Products
-        </h2>
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : error ? (
-          <div className="text-red-600 text-center py-8">{error}</div>
-        ) : featuredProducts.length === 0 ? (
-          <div className="text-center py-12 bg-gray-100 rounded-lg">
-            <p className="text-gray-600 text-lg">
-              No featured products yet. Check back soon!
-            </p>
-            <a
-              href="/products"
-              className="mt-4 inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition"
-            >
-              Browse All Products
-            </a>
+      <section className="bg-gray-50 py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="bg-yellow-100 p-3 rounded-xl">
+              <svg
+                className="w-6 h-6 text-yellow-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Featured Products
+            </h2>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={product}
-                hideAddToCart={true}
-                isFeatured={true}
-              />
-            ))}
-          </div>
-        )}
+          {loading ? (
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading featured products...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-white rounded-2xl shadow-md border border-red-100 p-8 text-center">
+              <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <p className="text-red-600 font-medium">{error}</p>
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
+              <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg
+                  className="w-10 h-10 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                No featured products yet
+              </h3>
+              <p className="text-gray-500 mb-6">
+                Check back soon for our top picks!
+              </p>
+              <a
+                href="/products"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/25"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+                Browse All Products
+              </a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  hideAddToCart={true}
+                  isFeatured={true}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );

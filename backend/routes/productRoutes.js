@@ -10,6 +10,8 @@ import {
   getProductReviews,
   getFeaturedProducts,
   toggleFeaturedProduct,
+  updateReview,
+  deleteReview,
 } from "../controllers/productController.js";
 import { authMiddleware, adminMiddleware } from "../middleware/auth.js";
 
@@ -23,6 +25,18 @@ router.get("/:id/reviews", getProductReviews);
 
 // Review routes
 router.post("/:id/reviews", authMiddleware, addReview);
+router.put(
+  "/:id/reviews/:reviewId",
+  authMiddleware,
+  adminMiddleware,
+  updateReview
+);
+router.delete(
+  "/:id/reviews/:reviewId",
+  authMiddleware,
+  adminMiddleware,
+  deleteReview
+);
 
 // Admin routes
 router.post("/", authMiddleware, adminMiddleware, createProduct);

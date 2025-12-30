@@ -1,9 +1,16 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const { products, shippingAddress, paymentMethod } = req.body;
+    const {
+      products,
+      shippingAddress,
+      billingAddress,
+      paymentDetails,
+      paymentMethod,
+    } = req.body;
 
     if (!products || products.length === 0) {
       return res.status(400).json({ message: "No products in order" });
@@ -28,12 +35,13 @@ export const createOrder = async (req, res) => {
 
       totalPrice += product.price * item.quantity;
       orderProducts.push({
-        productId: product._id,
+        productObjectId: product._id,
         name: product.name,
         price: product.price,
         quantity: item.quantity,
         image: product.images?.[0]?.url || null,
         size: item.size || null,
+        productId: product.productId || null,
       });
 
       // Update stock
@@ -46,10 +54,21 @@ export const createOrder = async (req, res) => {
       products: orderProducts,
       totalPrice,
       shippingAddress,
+      billingAddress,
+      paymentDetails,
       paymentMethod,
     });
 
     await order.save();
+
+    // Save shipping address to user profile for persistence
+    await User.findByIdAndUpdate(
+      req.userId,
+      {
+        address: shippingAddress,
+      },
+      { new: true, runValidators: false }
+    );
 
     res.status(201).json({
       message: "Order created successfully",
@@ -63,7 +82,7 @@ export const createOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.userId })
-      .populate("products.productId")
+      .populate("products.productObjectId")
       .sort({ createdAt: -1 });
 
     res.json(orders);
@@ -75,7 +94,7 @@ export const getMyOrders = async (req, res) => {
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate(
-      "products.productId"
+      "products.productObjectId"
     );
 
     if (!order) {
@@ -97,15 +116,41 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+    const order = await Order.findById(req.params.id);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
+
+    // Check authorization - non-admin users can only cancel their own orders
+    if (req.userRole !== "admin") {
+      if (order.userId.toString() !== req.userId) {
+        return res
+          .status(403)
+          .json({ message: "Not authorized to update this order" });
+      }
+
+      // Users can only cancel pending or processing orders
+      if (status === "cancelled") {
+        if (
+          order.status === "delivered" ||
+          order.status === "shipped" ||
+          order.status === "cancelled"
+        ) {
+          return res.status(400).json({
+            message: `Cannot cancel a ${order.status} order`,
+          });
+        }
+      } else {
+        // Users cannot change status to anything other than cancelled
+        return res.status(403).json({
+          message: "Users can only cancel orders",
+        });
+      }
+    }
+
+    order.status = status;
+    await order.save();
 
     res.json({
       message: "Order status updated successfully",

@@ -1,132 +1,106 @@
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { productService, authService } from "../services/services";
+import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 
 export default function Wishlist() {
+  const { wishlist } = useWishlist();
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const [wishlistProducts, setWishlistProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchWishlistProducts = async () => {
-      try {
-        setLoading(true);
-        let wishlistIds = [];
-
-        if (user) {
-          // Fetch from server for logged-in users
-          try {
-            const wishlistRes = await authService.getWishlist();
-            wishlistIds = wishlistRes.data.wishlist;
-          } catch (err) {
-            console.error("Error fetching wishlist from server:", err);
-            // Fall back to localStorage
-            wishlistIds = JSON.parse(localStorage.getItem("wishlist")) || [];
-          }
-        } else {
-          // Get from localStorage for non-logged-in users
-          wishlistIds = JSON.parse(localStorage.getItem("wishlist")) || [];
-        }
-
-        if (wishlistIds.length === 0) {
-          setWishlistProducts([]);
-          setLoading(false);
-          return;
-        }
-
-        // Fetch all products
-        const response = await productService.getProducts(null, 1);
-        const allProducts = response.data.products;
-
-        // Filter to only show wishlist products
-        const wishlist = allProducts.filter((product) =>
-          wishlistIds.includes(product._id)
-        );
-
-        setWishlistProducts(wishlist);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWishlistProducts();
-  }, [user]);
-
-  const handleRemoveFromWishlist = async (productId) => {
-    try {
-      if (user) {
-        // Remove from server for logged-in users
-        await authService.toggleWishlist(productId);
-      } else {
-        // Remove from localStorage for non-logged-in users
-        const wishlistIds = JSON.parse(localStorage.getItem("wishlist")) || [];
-        const updatedWishlist = wishlistIds.filter((id) => id !== productId);
-        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-      }
-
-      // Refresh wishlist data after removal
-      setWishlistProducts(wishlistProducts.filter((p) => p._id !== productId));
-    } catch (error) {
-      console.error("Error removing from wishlist:", error);
-      if (user?.isAdmin) {
-        alert("Error removing from wishlist");
-      }
+    if (user?.isAdmin) {
+      navigate("/admin/dashboard");
     }
-  };
+  }, [user, navigate]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-8">My Wishlist</h1>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="bg-pink-100 p-3 rounded-xl">
+            <svg
+              className="w-6 h-6 text-pink-600"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              My Wishlist
+            </h1>
+            <p className="text-gray-500 text-sm">
+              {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved
+            </p>
+          </div>
+        </div>
 
-      {loading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-600">Loading wishlist...</p>
-        </div>
-      ) : error ? (
-        <div className="text-center py-12">
-          <p className="text-red-600">{error}</p>
-        </div>
-      ) : wishlistProducts.length === 0 ? (
-        <div className="text-center py-12 bg-gray-100 rounded-lg">
-          <p className="text-gray-600 text-lg mb-4">Your wishlist is empty</p>
-          <a
-            href="/products"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition"
-          >
-            Browse Products
-          </a>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-          {wishlistProducts.map((product) => (
-            <div key={product._id} className="relative">
-              <ProductCard product={product} />
-              <button
-                onClick={() => handleRemoveFromWishlist(product._id)}
-                className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition z-10"
-                title="Remove from wishlist"
+        {loading ? (
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-pink-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading wishlist...</p>
+          </div>
+        ) : wishlist.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
+            <div className="bg-pink-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg
+                className="w-10 h-10 text-pink-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M6 18L18 6M6 6l12 12"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
             </div>
-          ))}
-        </div>
-      )}
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              Your wishlist is empty
+            </h2>
+            <p className="text-gray-500 mb-6">
+              Save items you love to your wishlist and come back to them
+              anytime.
+            </p>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-pink-500/25"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+              Browse Products
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 md:gap-6">
+            {wishlist.map((product) => (
+              <ProductCard
+                key={product._id}
+                product={product}
+                hideAddToCart={true}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -11,6 +11,11 @@ export const CartProvider = ({ children }) => {
 
   // Fetch cart from server if user is logged in
   useEffect(() => {
+    if (user?.isAdmin) {
+      setCart([]);
+      return;
+    }
+
     if (user) {
       fetchCart();
     } else {
@@ -60,6 +65,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (product, quantity = 1, size = null) => {
+    if (user?.isAdmin) {
+      alert("Admins cannot add items to cart.");
+      return;
+    }
     if (user) {
       try {
         await authService.addToCart(product._id, quantity, size);
@@ -97,6 +106,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (productId) => {
+    if (user?.isAdmin) {
+      alert("Admins cannot modify cart.");
+      return;
+    }
     if (user) {
       try {
         await authService.removeFromCart(productId);
@@ -110,6 +123,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = async (productId, quantity) => {
+    if (user?.isAdmin) {
+      alert("Admins cannot modify cart.");
+      return;
+    }
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -132,6 +149,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const clearCart = async () => {
+    if (user?.isAdmin) {
+      alert("Admins cannot modify cart.");
+      return;
+    }
     if (user) {
       try {
         await authService.clearCart();

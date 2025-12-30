@@ -17,11 +17,10 @@ export default function AdminFeatured() {
         const response = await productService.getProducts(null, page);
         setProducts(response.data.products);
         setTotalPages(response.data.pagination.pages);
-
-        // Fetch featured products from localStorage
-        const featured =
-          JSON.parse(localStorage.getItem("featuredProducts")) || [];
-        setFeaturedProducts(featured);
+        const featuredRes = await productService.getFeaturedProducts();
+        setFeaturedProducts(
+          (featuredRes.data.products || []).map((p) => p._id)
+        );
       } catch (err) {
         setError("Error loading products");
         console.error(err);
@@ -33,30 +32,27 @@ export default function AdminFeatured() {
     fetchProducts();
   }, [page]);
 
-  const toggleFeatured = (productId) => {
-    let updated = [...featuredProducts];
-
-    if (updated.includes(productId)) {
-      // Remove from featured
-      updated = updated.filter((id) => id !== productId);
-    } else {
-      // Add to featured
-      updated.push(productId);
-    }
-
-    setFeaturedProducts(updated);
-  };
-
-  const handleSaveFeatured = () => {
+  const toggleFeatured = async (productId) => {
     try {
-      localStorage.setItem(
-        "featuredProducts",
-        JSON.stringify(featuredProducts)
+      const res = await productService.toggleFeatured(productId);
+      const isNowFeatured = res.data.product?.isFeatured;
+      setFeaturedProducts((prev) => {
+        const set = new Set(prev);
+        if (isNowFeatured) {
+          set.add(productId);
+        } else {
+          set.delete(productId);
+        }
+        return Array.from(set);
+      });
+      setSuccess(
+        `Product ${isNowFeatured ? "added to" : "removed from"} featured`
       );
-      setSuccess("Featured products updated successfully!");
-      setTimeout(() => setSuccess(null), 3000);
+      setTimeout(() => setSuccess(null), 2000);
     } catch (err) {
-      setError("Error saving featured products");
+      console.error(err);
+      setError("Error updating featured status");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -169,14 +165,9 @@ export default function AdminFeatured() {
         </button>
       </div>
 
-      {/* Save Button */}
-      <div className="flex justify-end gap-4">
-        <button
-          onClick={handleSaveFeatured}
-          className="bg-green-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-green-700 transition"
-        >
-          Save Featured Products
-        </button>
+      {/* Info */}
+      <div className="flex justify-end gap-4 text-sm text-gray-600">
+        Changes are saved instantly when you toggle a product.
       </div>
     </div>
   );
