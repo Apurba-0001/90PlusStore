@@ -1,3 +1,40 @@
+// Remove a user (admin only, cannot remove admin users)
+export const removeUser = async (req, res) => {
+  try {
+    // Only admin can remove users
+    const requestingUser = await User.findById(req.userId);
+    if (!requestingUser || !requestingUser.isAdmin) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+    const userToRemove = await User.findById(req.params.id);
+    if (!userToRemove) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (userToRemove.isAdmin) {
+      return res.status(400).json({ message: "Cannot remove admin users" });
+    }
+    await userToRemove.deleteOne();
+    res.json({ message: "User removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// Get all users (admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find(
+      {},
+      { name: 1, email: 1, createdAt: 1, isAdmin: 1 }
+    );
+    res.json({
+      success: true,
+      total: users.length,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";

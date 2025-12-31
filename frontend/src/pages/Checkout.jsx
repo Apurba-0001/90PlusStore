@@ -104,13 +104,20 @@ export default function Checkout() {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
-  const [taxRate, setTaxRate] = useState(10);
+  const [taxRateIndia, setTaxRateIndia] = useState(0);
+  const [taxRateInternational, setTaxRateInternational] = useState(0);
   const [shippingRates, setShippingRates] = useState({
     indiaStandard: 10,
     indiaExpress: 50,
     internationalStandard: 200,
     internationalExpress: 500,
   });
+  const [indiaFreeShippingThreshold, setIndiaFreeShippingThreshold] =
+    useState(2000);
+  const [
+    internationalFreeShippingThreshold,
+    setInternationalFreeShippingThreshold,
+  ] = useState(5000);
 
   // Load settings from database
   useEffect(() => {
@@ -118,8 +125,15 @@ export default function Checkout() {
       try {
         const response = await settingsService.getSettings();
         const settings = response.data.data;
-        setTaxRate(settings.taxRate);
+        setTaxRateIndia(settings.taxRateIndia ?? 0);
+        setTaxRateInternational(settings.taxRateInternational ?? 0);
         setShippingRates(settings.shippingRates);
+        setIndiaFreeShippingThreshold(
+          settings.indiaFreeShippingThreshold || 2000
+        );
+        setInternationalFreeShippingThreshold(
+          settings.internationalFreeShippingThreshold || 5000
+        );
       } catch (err) {
         console.error("Error loading settings:", err);
       }
@@ -128,18 +142,32 @@ export default function Checkout() {
     loadSettings();
 
     // Listen for settings updates from admin panel
-    const handleTaxRateUpdate = (event) => {
-      setTaxRate(event.detail);
+    const handleTaxRateIndiaUpdate = (event) => {
+      setTaxRateIndia(event.detail);
+    };
+    const handleTaxRateInternationalUpdate = (event) => {
+      setTaxRateInternational(event.detail);
     };
     const handleShippingRatesUpdate = (event) => {
       setShippingRates(event.detail);
     };
 
-    window.addEventListener("taxRateUpdated", handleTaxRateUpdate);
+    window.addEventListener("taxRateIndiaUpdated", handleTaxRateIndiaUpdate);
+    window.addEventListener(
+      "taxRateInternationalUpdated",
+      handleTaxRateInternationalUpdate
+    );
     window.addEventListener("shippingRatesUpdated", handleShippingRatesUpdate);
 
     return () => {
-      window.removeEventListener("taxRateUpdated", handleTaxRateUpdate);
+      window.removeEventListener(
+        "taxRateIndiaUpdated",
+        handleTaxRateIndiaUpdate
+      );
+      window.removeEventListener(
+        "taxRateInternationalUpdated",
+        handleTaxRateInternationalUpdate
+      );
       window.removeEventListener(
         "shippingRatesUpdated",
         handleShippingRatesUpdate
@@ -174,16 +202,25 @@ export default function Checkout() {
     const isIndia =
       formData.country && formData.country.toLowerCase() === "india";
 
-    // Check if India purchase qualifies for free shipping (over ₹2000)
-    if (isIndia && getTotalPrice() > 2000) {
-      return 0; // Free shipping
-    }
-
+    // Free shipping only for Indian standard shipping above threshold
     if (isIndia) {
+      if (
+        formData.shippingType === "standard" &&
+        getTotalPrice() > indiaFreeShippingThreshold
+      ) {
+        return 0; // Free standard shipping (India)
+      }
       return formData.shippingType === "express"
         ? shippingRates.indiaExpress
         : shippingRates.indiaStandard;
     } else if (formData.country) {
+      // Free standard shipping for non-India above threshold
+      if (
+        formData.shippingType === "standard" &&
+        getTotalPrice() > internationalFreeShippingThreshold
+      ) {
+        return 0; // Free standard shipping (International)
+      }
       return formData.shippingType === "express"
         ? shippingRates.internationalExpress
         : shippingRates.internationalStandard;
@@ -193,11 +230,37 @@ export default function Checkout() {
 
   const shippingCost = getShippingCost();
 
-  // Check if India purchase qualifies for free shipping
+  // Tax calculation based on country
+  const getTaxRate = () => {
+    if (formData.country && formData.country.toLowerCase() === "india") {
+      return taxRateIndia;
+    } else if (formData.country) {
+      return taxRateInternational;
+    }
+    return 0;
+  };
+
+  // Check if Indian standard shipping qualifies for free shipping
   const isIndiaFreeShipping = () => {
     const isIndia =
       formData.country && formData.country.toLowerCase() === "india";
-    return isIndia && getTotalPrice() > 2000;
+    return (
+      isIndia &&
+      formData.shippingType === "standard" &&
+      getTotalPrice() > indiaFreeShippingThreshold
+    );
+  };
+
+  // Check if international standard shipping qualifies for free shipping
+  const isInternationalFreeShipping = () => {
+    const isIndia =
+      formData.country && formData.country.toLowerCase() === "india";
+    return (
+      !isIndia &&
+      formData.country &&
+      formData.shippingType === "standard" &&
+      getTotalPrice() > internationalFreeShippingThreshold
+    );
   };
 
   // Check if country is selected
@@ -265,20 +328,7 @@ export default function Checkout() {
         }
       }
 
-      // Persist mobile in user profile/address for future checkouts
-      await authService.updateProfile({
-        phone: formData.mobile,
-        address: {
-          houseNo: formData.houseNo,
-          street: formData.street,
-          city: formData.city,
-          state: formData.state,
-          country: formData.country,
-          zipCode: formData.zipCode,
-          countryCode: formData.countryCode,
-          phone: formData.mobile,
-        },
-      });
+      // Do not update user profile address from checkout page. Only use address for this order.
 
       const orderData = {
         products: cart.map((item) => ({
@@ -959,7 +1009,7 @@ export default function Checkout() {
                   <h3 className="font-semibold mb-3 text-sm sm:text-base text-gray-800">
                     Select Shipping Option:
                   </h3>
-                  {isIndiaFreeShipping() && (
+                  {formData.country && (
                     <div className="mb-3 p-3 bg-green-100 border border-green-300 rounded-xl flex items-center gap-2">
                       <svg
                         className="w-5 h-5 text-green-600 flex-shrink-0"
@@ -973,7 +1023,9 @@ export default function Checkout() {
                         />
                       </svg>
                       <p className="text-green-800 font-semibold text-xs sm:text-sm">
-                        Free shipping on orders over ₹2000!
+                        {formData.country.toLowerCase() === "india"
+                          ? `Free standard shipping in India on orders over ₹${indiaFreeShippingThreshold}!`
+                          : `Free standard international shipping on orders over ₹${internationalFreeShippingThreshold}!`}
                       </p>
                     </div>
                   )}
@@ -990,18 +1042,18 @@ export default function Checkout() {
                             className="w-4 h-4 text-blue-600"
                           />
                           <span className="ml-3">
-                            Standard (5-7 days) - ₹
+                            Standard (6-8 days) - ₹
                             {isIndiaFreeShipping() ? (
-                              <span className="line-through text-gray-400">
-                                {shippingRates.indiaStandard.toFixed(2)}
-                              </span>
+                              <>
+                                <span className="line-through text-gray-400">
+                                  {shippingRates.indiaStandard.toFixed(2)}
+                                </span>
+                                <span className="ml-1 text-green-600 font-bold">
+                                  FREE
+                                </span>
+                              </>
                             ) : (
                               shippingRates.indiaStandard.toFixed(2)
-                            )}
-                            {isIndiaFreeShipping() && (
-                              <span className="ml-1 text-green-600 font-bold">
-                                FREE
-                              </span>
                             )}
                           </span>
                         </label>
@@ -1015,7 +1067,7 @@ export default function Checkout() {
                             className="w-4 h-4 text-blue-600"
                           />
                           <span className="ml-3">
-                            Express (2-3 days) - ₹
+                            Express (3-4 days) - ₹
                             {shippingRates.indiaExpress.toFixed(2)}
                           </span>
                         </label>
@@ -1032,8 +1084,21 @@ export default function Checkout() {
                             className="w-4 h-4 text-blue-600"
                           />
                           <span className="ml-3">
-                            Standard (10-14 days) - ₹
-                            {shippingRates.internationalStandard.toFixed(2)}
+                            Standard (10-12 days) - ₹
+                            {isInternationalFreeShipping() ? (
+                              <>
+                                <span className="line-through text-gray-400">
+                                  {shippingRates.internationalStandard.toFixed(
+                                    2
+                                  )}
+                                </span>
+                                <span className="ml-1 text-green-600 font-bold">
+                                  FREE
+                                </span>
+                              </>
+                            ) : (
+                              shippingRates.internationalStandard.toFixed(2)
+                            )}
                           </span>
                         </label>
                         <label className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 text-xs sm:text-sm transition-all">
@@ -1093,13 +1158,16 @@ export default function Checkout() {
                       </span>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>Tax ({taxRate}%):</span>
+                      <span>
+                        Tax (
+                        {formData.country &&
+                        formData.country.toLowerCase() === "india"
+                          ? `${taxRateIndia}% (India)`
+                          : `${taxRateInternational}% (International)`}
+                        ):
+                      </span>
                       <span className="font-medium text-gray-800">
-                        ₹
-                        {(
-                          (getTotalPrice() + shippingCost) *
-                          (taxRate / 100)
-                        ).toFixed(2)}
+                        ₹{(getTotalPrice() * (getTaxRate() / 100)).toFixed(2)}
                       </span>
                     </div>
                   </>
@@ -1113,7 +1181,7 @@ export default function Checkout() {
                       ? (
                           getTotalPrice() +
                           shippingCost +
-                          (getTotalPrice() + shippingCost) * (taxRate / 100)
+                          getTotalPrice() * (getTaxRate() / 100)
                         ).toFixed(2)
                       : getTotalPrice().toFixed(2)}
                   </span>

@@ -1,9 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
+  // Mouse-following glow state for navbar
+  const [navMouse, setNavMouse] = useState({ x: 0, y: 0 });
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!navRef.current) return;
+      const rect = navRef.current.getBoundingClientRect();
+      setNavMouse({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    };
+    const navElem = navRef.current;
+    if (navElem) navElem.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      if (navElem) navElem.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,7 +50,25 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+    <nav
+      ref={navRef}
+      className="bg-gradient-to-r from-blue-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 overflow-hidden relative"
+    >
+      {/* Subtle mouse-following glow */}
+      <div
+        className="pointer-events-none absolute z-10"
+        style={{
+          left: navMouse.x - 60,
+          top: navMouse.y - 60,
+          width: 120,
+          height: 120,
+          background:
+            "radial-gradient(circle, rgba(56,189,248,0.18) 0%, rgba(59,130,246,0.10) 60%, transparent 100%)",
+          borderRadius: "50%",
+          filter: "blur(8px)",
+          transition: "left 0.12s, top 0.12s",
+        }}
+      ></div>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16 gap-1 sm:gap-2">
           <Link

@@ -8,9 +8,12 @@ import {
   settingsService,
 } from "../../services/services";
 
+import UserCard from "./UserCard";
+import UserDetails from "./UserDetails";
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, setUser, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -19,41 +22,98 @@ export default function AdminDashboard() {
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(false);
   const [adminName, setAdminName] = useState(user?.name || "");
   const [adminEmail, setAdminEmail] = useState(user?.email || "");
-  const [savingAdmin, setSavingAdmin] = useState(false);
   const [adminEditError, setAdminEditError] = useState("");
-  const [taxRate, setTaxRate] = useState(10);
-  const [shippingCost, setShippingCost] = useState(10);
-  const [settingsSaved, setSettingsSaved] = useState(false);
-  const [savingSettings, setSavingSettings] = useState(false);
+  const [savingAdmin, setSavingAdmin] = useState(false);
+  const [taxRateIndia, setTaxRateIndia] = useState(0);
+  const [taxRateInternational, setTaxRateInternational] = useState(0);
   const [shippingRates, setShippingRates] = useState({
-    indiaStandard: 10,
-    indiaExpress: 50,
-    internationalStandard: 200,
-    internationalExpress: 500,
+    indiaStandard: 0,
+    indiaExpress: 0,
+    internationalStandard: 0,
+    internationalExpress: 0,
   });
-
-  // Load settings from database
+  const [indiaFreeShippingThreshold, setIndiaFreeShippingThreshold] =
+    useState(0);
+  const [
+    internationalFreeShippingThreshold,
+    setInternationalFreeShippingThreshold,
+  ] = useState(0);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsError, setSettingsError] = useState("");
+  // Fetch settings (tax, shipping) on mount
   useEffect(() => {
-    const loadSettings = async () => {
+    const fetchSettings = async () => {
+      setSettingsLoading(true);
+      setSettingsError("");
       try {
-        const response = await settingsService.getSettings();
-        const settings = response.data.data;
-        setTaxRate(settings.taxRate);
-        setShippingRates(settings.shippingRates);
+        const res = await settingsService.getSettings();
+        const s = res.data.data || {};
+        setTaxRateIndia(s.taxRateIndia ?? 0);
+        setTaxRateInternational(s.taxRateInternational ?? 0);
+        setShippingRates({
+          indiaStandard: s.shippingRates?.indiaStandard ?? 0,
+          indiaExpress: s.shippingRates?.indiaExpress ?? 0,
+          internationalStandard: s.shippingRates?.internationalStandard ?? 0,
+          internationalExpress: s.shippingRates?.internationalExpress ?? 0,
+        });
+        setIndiaFreeShippingThreshold(s.indiaFreeShippingThreshold ?? 0);
+        setInternationalFreeShippingThreshold(
+          s.internationalFreeShippingThreshold ?? 0
+        );
       } catch (err) {
-        console.error("Error loading settings:", err);
+        setSettingsError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Failed to load settings"
+        );
+        console.error("Failed to load settings:", err);
+      } finally {
+        setSettingsLoading(false);
       }
     };
+    fetchSettings();
+  }, []);
+  const [savingSettings, setSavingSettings] = useState(false);
 
-    loadSettings();
+  const [settingsSaved, setSettingsSaved] = useState(false);
+  // Tax and Shipping settings toggle
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Registered Users State
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
+  const [selectedUser, setSelectedUser] = useState(false);
+
+  // Fetch users for Registered Users card/modal
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsersLoading(true);
+      setUsersError("");
+      try {
+        const res = await authService.getAllUsers();
+        setUsers(res.data.users || []);
+      } catch (err) {
+        setUsers([]);
+        setUsersError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Failed to fetch users"
+        );
+        console.error("Failed to fetch users:", err);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+    fetchUsers();
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const productsRes = await productService.getProducts();
         const ordersRes = await orderService.getAllOrders();
@@ -80,7 +140,6 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -88,12 +147,16 @@ export default function AdminDashboard() {
     setSavingSettings(true);
     try {
       await settingsService.updateSettings({
-        taxRate,
+        taxRateIndia,
+        taxRateInternational,
         shippingRates,
+        indiaFreeShippingThreshold,
+        internationalFreeShippingThreshold,
       });
 
       // Also update localStorage for immediate UI updates
-      localStorage.setItem("taxRate", taxRate);
+      localStorage.setItem("taxRateIndia", taxRateIndia);
+      localStorage.setItem("taxRateInternational", taxRateInternational);
       localStorage.setItem("shippingRates", JSON.stringify(shippingRates));
 
       // Dispatch custom event to notify other components about the change
@@ -101,7 +164,12 @@ export default function AdminDashboard() {
         new CustomEvent("shippingRatesUpdated", { detail: shippingRates })
       );
       window.dispatchEvent(
-        new CustomEvent("taxRateUpdated", { detail: taxRate })
+        new CustomEvent("taxRateIndiaUpdated", { detail: taxRateIndia })
+      );
+      window.dispatchEvent(
+        new CustomEvent("taxRateInternationalUpdated", {
+          detail: taxRateInternational,
+        })
       );
 
       setSettingsSaved(true);
@@ -203,6 +271,8 @@ export default function AdminDashboard() {
                   Admin Name
                 </label>
                 <input
+                  id="adminName"
+                  name="adminName"
                   type="text"
                   value={adminName}
                   onChange={(e) => setAdminName(e.target.value)}
@@ -216,6 +286,8 @@ export default function AdminDashboard() {
                   Email Address
                 </label>
                 <input
+                  id="adminEmail"
+                  name="adminEmail"
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
@@ -367,10 +439,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* Admin Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Link
           to="/admin/products"
-          className="group bg-gradient-to-br from-blue-500 to-blue-700 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-blue-400/30 hover:border-blue-400/60 hover:scale-105 transform"
+          className="group bg-gradient-to-br from-blue-500 to-blue-700 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-blue-400/30 hover:border-blue-500/60 hover:scale-105 transform min-h-[180px] md:min-h-[260px] flex flex-col justify-between overflow-hidden focus:outline-none focus:ring-4 focus:ring-blue-300 hover:ring-4 hover:ring-blue-300"
         >
           <div className="flex items-start justify-between mb-4">
             <div className="bg-white/20 p-3 rounded-lg group-hover:bg-white/30 transition-colors">
@@ -387,7 +459,7 @@ export default function AdminDashboard() {
 
         <Link
           to="/admin/orders"
-          className="group bg-gradient-to-br from-green-500 to-green-700 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-green-400/30 hover:border-green-400/60 hover:scale-105 transform"
+          className="group bg-gradient-to-br from-pink-500 to-pink-700 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-pink-300/30 hover:border-pink-400/60 hover:scale-105 transform min-h-[180px] md:min-h-[260px] flex flex-col justify-between overflow-hidden focus:outline-none focus:ring-4 focus:ring-pink-300 hover:ring-4 hover:ring-pink-300"
         >
           <div className="flex items-start justify-between mb-4">
             <div className="bg-white/20 p-3 rounded-lg group-hover:bg-white/30 transition-colors">
@@ -404,7 +476,7 @@ export default function AdminDashboard() {
 
         <Link
           to="/admin/products/new"
-          className="group bg-gradient-to-br from-purple-500 to-purple-700 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-purple-400/30 hover:border-purple-400/60 hover:scale-105 transform"
+          className="group bg-gradient-to-br from-purple-500 to-purple-700 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-purple-400/30 hover:border-purple-500/60 hover:scale-105 transform min-h-[180px] md:min-h-[260px] flex flex-col justify-between overflow-hidden focus:outline-none focus:ring-4 focus:ring-purple-300 hover:ring-4 hover:ring-purple-300"
         >
           <div className="flex items-start justify-between mb-4">
             <div className="bg-white/20 p-3 rounded-lg group-hover:bg-white/30 transition-colors">
@@ -418,10 +490,36 @@ export default function AdminDashboard() {
             Create a new product and add it to your store
           </p>
         </Link>
+
+        {/* Registered Users Card */}
+        <Link
+          to="/admin/users"
+          className="group bg-gradient-to-br from-orange-400 to-orange-600 text-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all border border-orange-300/30 hover:border-orange-400/60 hover:scale-105 transform min-h-[180px] md:min-h-[260px] flex flex-col justify-between overflow-hidden focus:outline-none focus:ring-4 focus:ring-orange-300 hover:ring-4 hover:ring-orange-300"
+        >
+          <div className="flex items-start justify-between mb-4">
+            <div className="bg-white/20 p-3 rounded-lg group-hover:bg-white/30 transition-colors">
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+            </div>
+          </div>
+          <h3 className="font-bold text-2xl mb-2">Registered Users</h3>
+          <p className="text-sm opacity-90 mt-2">
+            Click to manage and view all registered users.
+          </p>
+          {/* No error display here, handled on users page */}
+        </Link>
+        {/* No modal, navigation only */}
       </div>
 
       {/* Tax and Shipping */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8 mb-8">
+      <div
+        className={`bg-white rounded-xl shadow-md border border-gray-100 p-8 mb-8 transition-shadow duration-300${
+          !showSettings
+            ? " shadow-[0_0_24px_4px_rgba(239,68,68,0.18)] hover:shadow-[0_0_40px_8px_rgba(239,68,68,0.32)]"
+            : ""
+        }`}
+      >
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-gray-100 p-3 rounded-lg">
@@ -450,271 +548,281 @@ export default function AdminDashboard() {
 
         {showSettings && (
           <div className="border-t pt-6 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-blue-200 p-2 rounded-lg">
-                    <svg
-                      className="w-5 h-5 text-blue-700"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M11.29 10.29L19 2.59V6h2V0h-6v2h3.41l-7.71 7.71 1.42 1.42zM7.71 13.71L0 21.41V18H-2v6h6v-2H.59l7.71-7.71-1.42-1.42z"
-                        transform="translate(2, 2)"
-                      />
-                    </svg>
-                  </div>
-                  <label className="block text-gray-800 font-bold">
-                    Tax Rate (%)
-                  </label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    value={taxRate}
-                    onChange={(e) =>
-                      setTaxRate(parseFloat(e.target.value) || 0)
-                    }
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
-                  />
-                  <span className="text-gray-700 font-semibold">%</span>
-                </div>
-                <p className="text-xs text-blue-700 mt-3 italic">
-                  Example: 10 for 10% tax on orders
-                </p>
+            {settingsLoading ? (
+              <div className="text-blue-600 font-semibold p-4">
+                Loading settings...
               </div>
-            </div>
-
-            <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-xl">
-              <div className="flex items-center gap-2 mb-3">
-                <svg
-                  className="w-5 h-5 text-blue-700"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                </svg>
-                <h3 className="font-bold text-blue-900">Current Settings</h3>
+            ) : settingsError ? (
+              <div className="bg-red-100 text-red-700 rounded p-2 mb-2 border border-red-300">
+                Error loading settings: {settingsError}
               </div>
-              <p className="text-sm text-blue-800 ml-7">
-                Tax Rate: <span className="font-bold text-lg">{taxRate}%</span>
-              </p>
-            </div>
-
-            {/* Shipping Rates Section */}
-            <div className="mt-8 border-t pt-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <svg
-                    className="w-6 h-6 text-green-700"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm11 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM5 11l1.5-4.5h11L19 11H5z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Shipping Rates
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                  <label className="block text-gray-800 font-bold mb-3">
-                    <span className="text-emerald-700">🚚</span> India -
-                    Standard
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-700 font-semibold">₹</span>
-                    <input
-                      type="number"
-                      value={shippingRates.indiaStandard}
-                      onChange={(e) =>
-                        setShippingRates({
-                          ...shippingRates,
-                          indiaStandard: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                      className="w-full px-3 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white text-gray-900"
-                    />
-                  </div>
-                  <p className="text-xs text-emerald-700 mt-2 italic">
-                    ⏱️ 5-7 business days
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                  <label className="block text-gray-800 font-bold mb-3">
-                    <span className="text-emerald-700">🚀</span> India - Express
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-700 font-semibold">₹</span>
-                    <input
-                      type="number"
-                      value={shippingRates.indiaExpress}
-                      onChange={(e) =>
-                        setShippingRates({
-                          ...shippingRates,
-                          indiaExpress: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                      className="w-full px-3 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white text-gray-900"
-                    />
-                  </div>
-                  <p className="text-xs text-emerald-700 mt-2 italic">
-                    ⏱️ 2-3 business days
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-100 border border-blue-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                  <label className="block text-gray-800 font-bold mb-3">
-                    <span className="text-blue-700">🌍</span> International -
-                    Standard
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-700 font-semibold">₹</span>
-                    <input
-                      type="number"
-                      value={shippingRates.internationalStandard}
-                      onChange={(e) =>
-                        setShippingRates({
-                          ...shippingRates,
-                          internationalStandard:
-                            parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
-                    />
-                  </div>
-                  <p className="text-xs text-blue-700 mt-2 italic">
-                    ⏱️ 10-14 business days
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-100 border border-blue-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                  <label className="block text-gray-800 font-bold mb-3">
-                    <span className="text-blue-700">✈️</span> International -
-                    Express
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-700 font-semibold">₹</span>
-                    <input
-                      type="number"
-                      value={shippingRates.internationalExpress}
-                      onChange={(e) =>
-                        setShippingRates({
-                          ...shippingRates,
-                          internationalExpress: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
-                    />
-                  </div>
-                  <p className="text-xs text-blue-700 mt-2 italic">
-                    ⏱️ 5-7 business days
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 p-6 bg-gradient-to-br from-emerald-50 to-teal-100 border-2 border-emerald-300 rounded-xl">
-                <div className="flex items-center gap-2 mb-4">
-                  <svg
-                    className="w-5 h-5 text-emerald-700"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
-                  <h3 className="font-bold text-emerald-900">
-                    Current Shipping Rates
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-3 text-sm text-emerald-800 ml-7">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
-                    <span>
-                      India Standard:{" "}
-                      <span className="font-bold">
-                        ₹{shippingRates.indiaStandard.toFixed(2)}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
-                    <span>
-                      India Express:{" "}
-                      <span className="font-bold">
-                        ₹{shippingRates.indiaExpress.toFixed(2)}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                    <span>
-                      Intl Standard:{" "}
-                      <span className="font-bold">
-                        ₹{shippingRates.internationalStandard.toFixed(2)}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                    <span>
-                      Intl Express:{" "}
-                      <span className="font-bold">
-                        ₹{shippingRates.internationalExpress.toFixed(2)}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <button
-                onClick={handleSaveSettings}
-                disabled={savingSettings}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            ) : (
+              <form
+                className="space-y-8"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveSettings();
+                }}
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                </svg>
-                {savingSettings ? "Saving..." : "Save Settings"}
-              </button>
-              {settingsSaved && (
-                <div className="flex items-center gap-2 text-green-600 text-sm mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                  </svg>
-                  Settings saved successfully!
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {/* Tax Rate Cards */}
+                  <div className="flex flex-col gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow p-6 flex flex-col items-center">
+                      <div className="bg-blue-200 p-3 rounded-full mb-3">
+                        <svg
+                          className="w-7 h-7 text-blue-700"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M12 8v4l3 3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <circle cx="12" cy="12" r="10" />
+                        </svg>
+                      </div>
+                      <label className="block text-md font-bold mb-2 text-blue-900">
+                        Tax Rate (India) %
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="w-full px-4 py-2 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center font-semibold text-blue-900 bg-white"
+                        value={taxRateIndia}
+                        onChange={(e) =>
+                          setTaxRateIndia(Number(e.target.value))
+                        }
+                      />
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow p-6 flex flex-col items-center">
+                      <div className="bg-blue-200 p-3 rounded-full mb-3">
+                        <svg
+                          className="w-7 h-7 text-blue-700"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M12 8v4l3 3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <circle cx="12" cy="12" r="10" />
+                        </svg>
+                      </div>
+                      <label className="block text-md font-bold mb-2 text-blue-900">
+                        Tax Rate (International) %
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="w-full px-4 py-2 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center font-semibold text-blue-900 bg-white"
+                        value={taxRateInternational}
+                        onChange={(e) =>
+                          setTaxRateInternational(Number(e.target.value))
+                        }
+                      />
+                    </div>
+                  </div>
+                  {/* India Shipping Card */}
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow p-6 flex flex-col items-center">
+                    <div className="bg-green-200 p-3 rounded-full mb-3">
+                      <svg
+                        className="w-7 h-7 text-green-700"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M3 12h18M3 12l6-6m-6 6l6 6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <label className="block text-md font-bold mb-2 text-green-900">
+                      India Shipping (₹)
+                    </label>
+                    <div className="flex gap-2 w-full">
+                      <div className="flex flex-wrap gap-2 w-full">
+                        <table className="w-full mb-2">
+                          <thead>
+                            <tr>
+                              <th className="text-xs font-semibold text-green-700 text-center">
+                                Standard
+                              </th>
+                              <th className="text-xs font-semibold text-green-700 text-center">
+                                Express
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="p-0 align-top">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="min-w-[100px] w-full px-3 py-2 rounded-lg border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-center font-semibold text-green-900 bg-white"
+                                  value={shippingRates.indiaStandard}
+                                  onChange={(e) =>
+                                    setShippingRates((r) => ({
+                                      ...r,
+                                      indiaStandard: Number(e.target.value),
+                                    }))
+                                  }
+                                  placeholder="Standard (India)"
+                                />
+                              </td>
+                              <td className="p-0 align-top">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="min-w-[100px] w-full px-3 py-2 rounded-lg border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-center font-semibold text-green-900 bg-white"
+                                  value={shippingRates.indiaExpress}
+                                  onChange={(e) =>
+                                    setShippingRates((r) => ({
+                                      ...r,
+                                      indiaExpress: Number(e.target.value),
+                                    }))
+                                  }
+                                  placeholder="Express (India)"
+                                />
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <label className="block text-xs mt-3 mb-1 text-green-700">
+                      Free Shipping Threshold (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="w-full px-3 py-2 rounded-lg border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 text-center font-semibold text-green-900 bg-white"
+                      value={indiaFreeShippingThreshold}
+                      onChange={(e) =>
+                        setIndiaFreeShippingThreshold(Number(e.target.value))
+                      }
+                    />
+                  </div>
+                  {/* International Shipping Card */}
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow p-6 flex flex-col items-center">
+                    <div className="bg-purple-200 p-3 rounded-full mb-3">
+                      <svg
+                        className="w-7 h-7 text-purple-700"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 0v20m0-20C6.48 2 2 6.48 2 12s4.48 10 10 10"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <label className="block text-md font-bold mb-2 text-purple-900">
+                      International Shipping (₹)
+                    </label>
+                    <div className="flex gap-2 w-full">
+                      <div className="flex flex-wrap gap-2 w-full">
+                        <table className="w-full mb-2">
+                          <thead>
+                            <tr>
+                              <th className="text-xs font-semibold text-purple-700 text-center">
+                                Standard
+                              </th>
+                              <th className="text-xs font-semibold text-purple-700 text-center">
+                                Express
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="p-0 align-top">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="min-w-[100px] w-full px-3 py-2 rounded-lg border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-center font-semibold text-purple-900 bg-white"
+                                  value={shippingRates.internationalStandard}
+                                  onChange={(e) =>
+                                    setShippingRates((r) => ({
+                                      ...r,
+                                      internationalStandard: Number(
+                                        e.target.value
+                                      ),
+                                    }))
+                                  }
+                                  placeholder="Standard (Intl)"
+                                />
+                              </td>
+                              <td className="p-0 align-top">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="min-w-[100px] w-full px-3 py-2 rounded-lg border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-center font-semibold text-purple-900 bg-white"
+                                  value={shippingRates.internationalExpress}
+                                  onChange={(e) =>
+                                    setShippingRates((r) => ({
+                                      ...r,
+                                      internationalExpress: Number(
+                                        e.target.value
+                                      ),
+                                    }))
+                                  }
+                                  placeholder="Express (Intl)"
+                                />
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <label className="block text-xs mt-3 mb-1 text-purple-700">
+                      Free Shipping Threshold (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="w-full px-3 py-2 rounded-lg border border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-center font-semibold text-purple-900 bg-white"
+                      value={internationalFreeShippingThreshold}
+                      onChange={(e) =>
+                        setInternationalFreeShippingThreshold(
+                          Number(e.target.value)
+                        )
+                      }
+                    />
+                  </div>
                 </div>
-              )}
-            </div>
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold text-lg shadow hover:from-blue-700 hover:to-purple-700 transition disabled:opacity-50 mt-6"
+                  disabled={savingSettings}
+                >
+                  {savingSettings ? "Saving..." : "Save Settings"}
+                </button>
+                {settingsSaved && (
+                  <div className="text-green-600 font-semibold text-center mt-2">
+                    Settings saved!
+                  </div>
+                )}
+              </form>
+            )}
           </div>
         )}
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8">
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8 transition-shadow duration-300 shadow-[0_0_24px_4px_rgba(59,130,246,0.18)] hover:shadow-[0_0_40px_8px_rgba(59,130,246,0.32)] mb-2">
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-blue-100 p-3 rounded-lg">
             <svg
@@ -758,7 +866,7 @@ export default function AdminDashboard() {
                     {order._id.substring(0, 8)}...
                   </td>
                   <td className="py-4 px-4 text-gray-700 font-medium">
-                    {order.userId?.name || "Unknown"}
+                    {order.userId?.name || order.user?.name || "Unknown"}
                   </td>
                   <td className="py-4 px-4 text-gray-900 font-bold">
                     ₹{order.totalPrice.toFixed(2)}

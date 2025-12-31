@@ -8,7 +8,13 @@ const settingsSchema = new mongoose.Schema(
       unique: true,
       enum: ["store_settings"], // Only one settings document
     },
-    taxRate: {
+    taxRateIndia: {
+      type: Number,
+      default: 10,
+      min: 0,
+      max: 100,
+    },
+    taxRateInternational: {
       type: Number,
       default: 10,
       min: 0,
@@ -35,6 +41,16 @@ const settingsSchema = new mongoose.Schema(
         default: 500,
         min: 0,
       },
+    },
+    indiaFreeShippingThreshold: {
+      type: Number,
+      default: 2000,
+      min: 0,
+    },
+    internationalFreeShippingThreshold: {
+      type: Number,
+      default: 5000,
+      min: 0,
     },
   },
   {

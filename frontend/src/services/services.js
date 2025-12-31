@@ -11,6 +11,9 @@ export const authService = {
 
   updateProfile: (data) => apiClient.put("/auth/profile", data),
 
+  getAllUsers: () => apiClient.get("/auth/users"),
+  removeUser: (id) => apiClient.delete(`/auth/users/${id}`),
+
   // Cart endpoints
   getCart: () => apiClient.get("/auth/cart"),
   addToCart: (productId, quantity, size) =>

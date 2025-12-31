@@ -1,3 +1,7 @@
+/* Glow effect for hero text on hover */
+.glow-text:hover {
+  text-shadow: 0 0 8px #fde047, 0 0 16px #fde047, 0 0 24px #fde047;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

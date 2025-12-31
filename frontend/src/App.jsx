@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -22,6 +27,7 @@ import Returns from "./pages/Returns";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductForm from "./pages/admin/AdminProductForm";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -60,11 +66,24 @@ function App() {
             />
 
             {/* Admin Routes */}
+            {/* Redirect /admin to /admin/dashboard */}
+            <Route
+              path="/admin"
+              element={<Navigate to="/admin/dashboard" replace />}
+            />
             <Route
               path="/admin/dashboard"
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminUsers />
                 </ProtectedRoute>
               }
             />
