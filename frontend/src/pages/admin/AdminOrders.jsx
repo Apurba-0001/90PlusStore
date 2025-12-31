@@ -360,8 +360,9 @@ export default function AdminOrders() {
                           </span>
                         </p>
 
-                        {/* Credit Card Details */}
-                        {order.paymentMethod === "credit-card" &&
+                        {/* Card Details (Credit/Debit) */}
+                        {(order.paymentMethod === "credit-card" ||
+                          order.paymentMethod === "debit-card") &&
                           order.paymentDetails?.cardHolderName && (
                             <div className="bg-white p-3 rounded border border-blue-200">
                               <p className="text-sm mb-2">
@@ -394,7 +395,8 @@ export default function AdminOrders() {
                           )}
 
                         {/* UPI Details */}
-                        {order.paymentMethod === "upi" &&
+                        {(order.paymentMethod === "upi" ||
+                          order.paymentMethod === "upi-id") &&
                           order.paymentDetails?.upiId && (
                             <div className="bg-white p-3 rounded border border-purple-200">
                               <p className="text-sm">

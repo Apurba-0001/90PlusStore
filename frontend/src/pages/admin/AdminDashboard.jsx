@@ -122,8 +122,9 @@ export default function AdminDashboard() {
         const orders = ordersRes.data.orders;
         const pendingOrders = orders.filter((o) => o.status === "pending");
 
+        // Only include delivered orders in total revenue
         const totalRevenue = orders
-          .filter((o) => o.status !== "cancelled")
+          .filter((o) => o.status === "delivered")
           .reduce((sum, order) => sum + order.totalPrice, 0);
 
         setStats({
