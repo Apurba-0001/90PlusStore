@@ -109,6 +109,7 @@ export default function AdminProductForm() {
         !formData.price ||
         !formData.stock
       ) {
+        alert("Please fill in all required fields");
         setLoading(false);
         return;
       }

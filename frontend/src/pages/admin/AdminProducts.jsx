@@ -36,11 +36,13 @@ export default function AdminProducts() {
   }, [page]);
 
   const handleDelete = async (id) => {
-    try {
-      await productService.deleteProduct(id);
-      setProducts(products.filter((p) => p._id !== id));
-    } catch (err) {
-      alert("Error deleting product: " + err.message);
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await productService.deleteProduct(id);
+        setProducts(products.filter((p) => p._id !== id));
+      } catch (err) {
+        alert("Error deleting product: " + err.message);
+      }
     }
   };
 
