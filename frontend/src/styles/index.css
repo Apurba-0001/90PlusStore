@@ -2,8 +2,11 @@
 .glow-text:hover {
   text-shadow: 0 0 8px #fde047, 0 0 16px #fde047, 0 0 24px #fde047;
 }
+/* Tailwind base layer - requires Tailwind CSS build tool */
 @tailwind base;
+/* Tailwind components layer - requires Tailwind CSS build tool */
 @tailwind components;
+/* Tailwind utilities layer - requires Tailwind CSS build tool */
 @tailwind utilities;
 
 * {
@@ -50,6 +53,7 @@ body {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2; /* Standard property for compatibility */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

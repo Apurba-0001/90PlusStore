@@ -108,7 +108,7 @@ export default function AdminProducts() {
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end flex-1">
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
+                  <label className="text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
                     <svg
                       className="w-4 h-4 text-blue-600"
                       fill="currentColor"
@@ -131,7 +131,7 @@ export default function AdminProducts() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
+                  <label className="text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
                     <svg
                       className="w-4 h-4 text-blue-600"
                       fill="currentColor"

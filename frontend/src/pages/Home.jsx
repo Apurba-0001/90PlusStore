@@ -396,9 +396,7 @@ export default function Home() {
               transform: textHover ? "scale(1.045)" : "scale(1)",
               transition: "transform 0.38s cubic-bezier(.22,1,.36,1)",
             }}
-            style={{
-              transform: textHover ? "scale(1.045)" : "scale(1)",
-            }}
+           
             onMouseEnter={() => setTextHover(true)}
             onMouseLeave={() => setTextHover(false)}
           >

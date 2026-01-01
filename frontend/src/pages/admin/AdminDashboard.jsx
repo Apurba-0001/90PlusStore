@@ -823,7 +823,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8 transition-shadow duration-300 shadow-[0_0_24px_4px_rgba(59,130,246,0.18)] hover:shadow-[0_0_40px_8px_rgba(59,130,246,0.32)] mb-2">
+      <div className="bg-white rounded-xl border border-gray-100 p-8 transition-shadow duration-300 shadow-[0_0_24px_4px_rgba(59,130,246,0.18)] hover:shadow-[0_0_40px_8px_rgba(59,130,246,0.32)] mb-2">
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-blue-100 p-3 rounded-lg">
             <svg

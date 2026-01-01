@@ -52,7 +52,7 @@ export default function Navbar() {
   return (
     <nav
       ref={navRef}
-      className="bg-gradient-to-r from-blue-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 overflow-hidden relative"
+      className="bg-gradient-to-r from-blue-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 overflow-hidden"
     >
       {/* Subtle mouse-following glow */}
       <div
