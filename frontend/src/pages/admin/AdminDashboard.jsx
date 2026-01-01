@@ -177,7 +177,7 @@ export default function AdminDashboard() {
       setTimeout(() => setSettingsSaved(false), 3000);
     } catch (err) {
       console.error("Error saving settings:", err);
-      alert("Failed to save settings. Please try again.");
+      setSettingsError("Failed to save settings. Please try again.");
     } finally {
       setSavingSettings(false);
     }

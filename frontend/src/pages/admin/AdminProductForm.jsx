@@ -109,7 +109,6 @@ export default function AdminProductForm() {
         !formData.price ||
         !formData.stock
       ) {
-        alert("Please fill in all required fields");
         setLoading(false);
         return;
       }
@@ -118,10 +117,8 @@ export default function AdminProductForm() {
 
       if (id) {
         await productService.updateProduct(id, formData);
-        alert("Product updated successfully");
       } else {
         await productService.createProduct(formData);
-        alert("Product created successfully");
       }
       navigate("/admin/products");
     } catch (err) {

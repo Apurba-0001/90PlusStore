@@ -67,7 +67,6 @@ export default function AdminOrders() {
         o._id === orderId ? { ...o, status: newStatus } : o
       );
       setOrders(updatedOrders);
-      alert("Order status updated successfully");
     } catch (err) {
       alert("Error updating order: " + err.message);
     }
