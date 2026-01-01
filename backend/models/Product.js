@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["Men", "Women", "Kids"],
+      enum: ["Men", "Women", "Kids", "All"],
       default: "Men",
     },
     availableSizes: [
@@ -88,6 +88,10 @@ const productSchema = new mongoose.Schema(
     ],
     brand: String,
     productId: String,
+    sku: {
+      type: String,
+      sparse: true,
+    },
     isFeatured: {
       type: Boolean,
       default: false,

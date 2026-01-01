@@ -170,6 +170,7 @@ export default function AdminProductForm() {
               <option>Men</option>
               <option>Women</option>
               <option>Kids</option>
+              <option>All</option>
             </select>
           </div>
         </div>

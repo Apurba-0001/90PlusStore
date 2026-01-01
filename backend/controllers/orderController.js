@@ -61,15 +61,6 @@ export const createOrder = async (req, res) => {
 
     await order.save();
 
-    // Save shipping address to user profile for persistence
-    await User.findByIdAndUpdate(
-      req.userId,
-      {
-        address: shippingAddress,
-      },
-      { new: true, runValidators: false }
-    );
-
     res.status(201).json({
       message: "Order created successfully",
       order,
