@@ -154,6 +154,55 @@ Authorization: Bearer <token>
 
 ---
 
+## Admin Endpoints
+
+### Get All Users (Admin Only)
+
+**GET** `/auth/users`
+
+Retrieves all users. Requires admin privileges.
+
+**Headers:**
+
+```
+Authorization: Bearer <admin_token>
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "total": 2,
+  "users": [
+    { "name": "John Doe", "email": "john@example.com", "isAdmin": false },
+    { "name": "Admin", "email": "admin@example.com", "isAdmin": true }
+  ]
+}
+```
+
+---
+
+### Remove User (Admin Only)
+
+**DELETE** `/auth/users/:id`
+
+Removes a user by ID. Cannot remove admin users. Requires admin privileges.
+
+**Headers:**
+
+```
+Authorization: Bearer <admin_token>
+```
+
+**Response (200):**
+
+```json
+{ "message": "User removed successfully" }
+```
+
+---
+
 ## Product Endpoints
 
 ### Get All Products
@@ -527,6 +576,60 @@ Authorization: Bearer <admin-token>
     "pages": 5
   }
 }
+```
+
+---
+
+## Settings Endpoints
+
+### Get Store Settings
+
+**GET** `/settings`
+
+Returns store settings (tax rates, shipping rates, etc).
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "taxRateIndia": 10,
+    "taxRateInternational": 10,
+    "shippingRates": { "indiaStandard": 10, "internationalStandard": 200 },
+    "indiaFreeShippingThreshold": 2000,
+    "internationalFreeShippingThreshold": 5000
+  }
+}
+```
+
+---
+
+### Update Store Settings (Admin Only)
+
+**PUT** `/settings`
+
+Updates store settings. Requires admin privileges.
+
+**Headers:**
+
+```
+Authorization: Bearer <admin_token>
+```
+
+**Request Body:**
+
+```json
+{
+  "taxRateIndia": 12,
+  "shippingRates": { "indiaStandard": 15 }
+}
+```
+
+**Response (200):**
+
+```json
+{ "success": true, "data": { ...updated settings... } }
 ```
 
 ---
