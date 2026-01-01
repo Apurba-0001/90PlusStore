@@ -18,6 +18,7 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  scroll-padding-top: 80px;
 }
 
 body {
@@ -27,6 +28,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f9fafb;
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Mobile-first responsive text sizing */
@@ -103,6 +106,9 @@ img {
 button,
 a {
   transition: all 0.3s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Better form input styling for mobile */

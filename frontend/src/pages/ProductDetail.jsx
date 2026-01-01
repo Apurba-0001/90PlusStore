@@ -35,10 +35,35 @@ export default function ProductDetail() {
   const [adminReviewError, setAdminReviewError] = useState("");
   const [adminReviewSaving, setAdminReviewSaving] = useState(false);
   const [reviewSort, setReviewSort] = useState("newest");
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
 
-  // Categories that require size selection (all except Collectibles)
+  // Dynamic similar products count based on screen size
+  const getSimilarProductsCount = () => {
+    if (windowWidth < 640) return 6; // Mobile: XS
+    if (windowWidth < 768) return 8; // Mobile: SM
+    if (windowWidth < 1024) return 10; // Tablet: MD
+    if (windowWidth < 1280) return 12; // Laptop: LG
+    return 15; // Desktop: XL+
+  };
+
+  const similarProductsCount = getSimilarProductsCount();
+
+  // Handle window resize for responsive products count
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Categories that require size selection (all except Accessories and Special Collectibles)
   const requiresSize =
-    product?.category && product.category !== "Special Collectibles";
+    product?.category &&
+    product.category !== "Special Collectibles" &&
+    product.category !== "Accessories";
 
   const scrollLeft = (ref) => {
     if (ref) {
@@ -118,16 +143,19 @@ export default function ProductDetail() {
 
         // Fetch related products from the same category
         if (response.data.category) {
-          const allProductsRes = await productService.getProducts();
+          const allProductsRes = await productService.getProducts(
+            undefined,
+            1,
+            undefined,
+            1000 // Request all products with high limit
+          );
           const products =
             allProductsRes.data.products || allProductsRes.data || [];
-          const sameCategoryProducts = products
-            .filter(
-              (p) =>
-                p.category === response.data.category &&
-                p._id !== response.data._id
-            )
-            .slice(0, 8); // Limit to 8 products
+          const sameCategoryProducts = products.filter(
+            (p) =>
+              p.category === response.data.category &&
+              p._id !== response.data._id
+          );
           setRelatedProducts(sameCategoryProducts);
         }
       } catch (err) {
@@ -749,7 +777,7 @@ export default function ProductDetail() {
                 ref={(el) => setMobileScrollRef(el)}
                 className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-6"
               >
-                {relatedProducts.slice(0, 10).map((relatedProduct) => (
+                {relatedProducts.map((relatedProduct) => (
                   <Link
                     key={relatedProduct._id}
                     to={`/product/${relatedProduct._id}`}
@@ -838,7 +866,7 @@ export default function ProductDetail() {
                 ref={(el) => setDesktopScrollRef(el)}
                 className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-10"
               >
-                {relatedProducts.slice(0, 15).map((relatedProduct) => (
+                {relatedProducts.map((relatedProduct) => (
                   <Link
                     key={relatedProduct._id}
                     to={`/product/${relatedProduct._id}`}

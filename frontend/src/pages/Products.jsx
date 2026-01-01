@@ -25,6 +25,25 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortBy, setSortBy] = useState("");
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
+
+  // Responsive products per page: 20 for mobile, 30 for desktop
+  const getProductsPerPage = () => {
+    return windowWidth < 768 ? 20 : 30; // Mobile: 20, Desktop: 30
+  };
+
+  const productsPerPage = getProductsPerPage();
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const getAvailableSizes = () => {
     if (selectedCategory === "Footwear") {
@@ -62,7 +81,8 @@ export default function Products() {
         const response = await productService.getProducts(
           selectedCategory || undefined,
           page,
-          search || undefined
+          search || undefined,
+          productsPerPage // Responsive: 20 for mobile, 30 for desktop
         );
         let filteredProducts = response.data.products;
 
@@ -396,38 +416,40 @@ export default function Products() {
                 ))}
               </div>
 
-              {/* Pagination */}
-              <div className="flex flex-wrap justify-center gap-2">
-                <button
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`px-4 py-2.5 border-2 rounded-xl text-sm sm:text-base font-medium transition-all ${
-                        page === p
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  )
-                )}
-                <button
-                  onClick={() => setPage(Math.min(totalPages, page + 1))}
-                  disabled={page === totalPages}
-                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
-                >
-                  Next
-                </button>
-              </div>
+              {/* Pagination - Only show if more than 1 page */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap justify-center gap-2">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-4 py-2.5 border-2 rounded-xl text-sm sm:text-base font-medium transition-all ${
+                          page === p
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

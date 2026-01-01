@@ -3,7 +3,7 @@ import User from "../models/User.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { category, page = 1, limit = 10, search } = req.query;
+    const { category, page = 1, limit = 100, search } = req.query;
     const skip = (page - 1) * limit;
 
     let query = {};
