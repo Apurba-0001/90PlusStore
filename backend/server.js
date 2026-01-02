@@ -37,6 +37,15 @@ app.get("/api/health", (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    service: "90PlusStore Backend",
+    environment: process.env.NODE_ENV
+  });
+});
+
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
