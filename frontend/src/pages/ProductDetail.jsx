@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import StarRating from "../components/StarRating";
+import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 
 const minSwipeDistance = 50;
 
@@ -355,15 +356,8 @@ export default function ProductDetail() {
   const userHasReviewed =
     user && reviews.some((review) => review.userId === user.id);
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product...</p>
-        </div>
-      </div>
-    );
+  if (loading) return <ProductDetailSkeleton />;
+
   if (error)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

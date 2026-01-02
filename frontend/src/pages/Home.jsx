@@ -17,6 +17,8 @@ function useTypewriter(text, speed = 80) {
 import { useAuth } from "../context/AuthContext";
 import { productService } from "../services/services";
 import ProductCard from "../components/ProductCard";
+import ProductSkeleton from "../components/ProductSkeleton";
+
 
 export default function Home() {
   const { user } = useAuth();
@@ -493,11 +495,13 @@ export default function Home() {
             </h2>
           </div>
           {loading ? (
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-12 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading featured products...</p>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <ProductSkeleton key={i} />
+             ))}
             </div>
           ) : error ? (
+
             <div className="bg-white rounded-2xl shadow-md border border-red-100 p-8 text-center">
               <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
