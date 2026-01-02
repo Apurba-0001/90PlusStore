@@ -17,6 +17,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Lightweight keep-alive ping (for UptimeRobot)
+app.get("/ping", (req, res) => {
+  res.status(200).type("text").send("OK");
+});
+
+
 // Database connection
 mongoose
   .connect(process.env.MONGODB_URI)
