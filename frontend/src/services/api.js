@@ -9,9 +9,7 @@ const getApiUrl = () => {
 
   // Production: use relative path (works when frontend and backend are on same domain)
   // Or use current host with /api (works with proxy)
-  if (import.meta.env.PROD) {
-    return "/api";
-  }
+  
 
   // Development fallback
   return "http://localhost:5000/api";

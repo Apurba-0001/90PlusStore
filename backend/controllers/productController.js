@@ -358,14 +358,17 @@ export const deleteReview = async (req, res) => {
 
 export const getFeaturedProducts = async (req, res) => {
   try {
-    const featured = await Product.find({ isFeatured: true }).sort({
+    const featuredProducts = await Product.find({ isFeatured: true }).sort({
       createdAt: -1,
     });
-    res.json({ products: featured });
+
+    res.status(200).json(featuredProducts);
   } catch (error) {
+    console.error("getFeaturedProducts error:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const toggleFeaturedProduct = async (req, res) => {
   try {

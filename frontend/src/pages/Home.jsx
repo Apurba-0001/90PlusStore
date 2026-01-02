@@ -53,7 +53,7 @@ export default function Home() {
     const fetchFeaturedProducts = async () => {
       try {
         const response = await productService.getFeaturedProducts();
-        setFeaturedProducts(response.data.products || []);
+        setFeaturedProducts(response.data || []);
       } catch (err) {
         setError(err.message);
       } finally {
