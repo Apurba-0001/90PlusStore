@@ -399,9 +399,6 @@ For support, email 90plusstore0@gmail.com or open an issue on GitHub.
 
 - [ ] Payment gateway integration (Stripe, PayPal)
 - [ ] Email notifications
-- [ ] Wishlist feature
-- [ ] Product reviews and ratings
-- [ ] Inventory management dashboard
 - [ ] Sales analytics
 - [ ] Multi-language support
 - [ ] Dark mode
@@ -410,4 +407,4 @@ For support, email 90plusstore0@gmail.com or open an issue on GitHub.
 
 ---
 
-**Made with ❤️ by the 90PlusStore Team**
+**Made with ❤️ by Apurba Maji**
