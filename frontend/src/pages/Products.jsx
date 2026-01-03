@@ -161,9 +161,9 @@ export default function Products() {
                 { name: "Jackets and Sweatshirts", emoji: "🧥" },
                 { name: "Footwear", emoji: "👟" },
                 { name: "Shorts", emoji: "🩳" },
-                { name: "Tracksuits", emoji: "🏃" },
-                { name: "Special Collectibles", emoji: "⭐" },
-                { name: "Accessories", emoji: "💎" },
+                { name: "Tracksuits", emoji: "🏃🏻‍♂️" },
+                { name: "Special Collectibles", emoji: "🎁" },
+                { name: "Accessories", emoji: "⚽" },
               ].map((category) => (
                 <button
                   key={category.name}
