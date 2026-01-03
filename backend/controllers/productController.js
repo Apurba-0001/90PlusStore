@@ -13,7 +13,6 @@ export const getAllProducts = async (req, res) => {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
         { brand: { $regex: search, $options: "i" } },
         { category: { $regex: search, $options: "i" } },
         { gender: { $regex: search, $options: "i" } },
@@ -368,7 +367,6 @@ export const getFeaturedProducts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 export const toggleFeaturedProduct = async (req, res) => {
   try {
