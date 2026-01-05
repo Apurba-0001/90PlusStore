@@ -3,7 +3,7 @@ import User from "../models/User.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { category, page = 1, limit = 100, search } = req.query;
+    const { category, page = 1, limit = 100, search, gender } = req.query;
     const skip = (page - 1) * limit;
 
     let query = {};
@@ -18,6 +18,14 @@ export const getAllProducts = async (req, res) => {
         { gender: { $regex: search, $options: "i" } },
         { productId: { $regex: search, $options: "i" } },
       ];
+    }
+    // Gender filter logic
+    if (gender && gender !== "") {
+      if (gender === "Men" || gender === "Women" || gender === "Kids") {
+        query.$or = [{ gender: gender }, { gender: { $regex: /^all$/i } }];
+      } else if (gender.toLowerCase() === "all") {
+        query.gender = { $in: ["Men", "Women", "Kids", "All", "all"] };
+      }
     }
 
     const products = await Product.find(query)

@@ -85,16 +85,29 @@ export default function Products() {
           search || undefined,
           productsPerPage // Responsive: 20 for mobile, 30 for desktop
         );
+
         let filteredProducts = response.data.products;
 
         // Only apply additional filters if NOT searching
         // When searching, show all matching results
         if (!search) {
-          // Filter by gender (only if product has gender field)
+          // Gender filter logic
           if (selectedGender) {
-            filteredProducts = filteredProducts.filter(
-              (product) => !product.gender || product.gender === selectedGender
-            );
+            if (
+              selectedGender === "Men" ||
+              selectedGender === "Women" ||
+              selectedGender === "Kids"
+            ) {
+              filteredProducts = filteredProducts.filter(
+                (product) =>
+                  !product.gender ||
+                  product.gender.toLowerCase() ===
+                    selectedGender.toLowerCase() ||
+                  product.gender.toLowerCase() === "all"
+              );
+            } else if (selectedGender === "") {
+              // All selected: show all
+            }
           }
 
           // Filter by size (only if product has availableSizes)
