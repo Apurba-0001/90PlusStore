@@ -37,7 +37,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/contact" className="hover:text-white">
-                  Query
+                  Contact Us
                 </Link>
               </li>
               <li>
