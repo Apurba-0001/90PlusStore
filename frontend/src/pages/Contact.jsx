@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -8,6 +9,8 @@ export default function Contact() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,11 +19,40 @@ export default function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically send the form data to a backend
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setTimeout(() => setSubmitted(false), 5000);
+    if (isSending) return;
+    setIsSending(true);
+
+    emailjs
+      .send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      )
+      .then(
+        () => {
+          setSubmitted(true);
+          setFormData({
+            name: "",
+            email: "",
+            subject: "",
+            message: "",
+          });
+          setTimeout(() => setSubmitted(false), 5000);
+        },
+        (error) => {
+          console.error("EmailJS Error:", error);
+          alert("Message failed. Please try again.");
+        }
+      )
+      .finally(() => {
+        setIsSending(false);
+      });
   };
 
   return (
@@ -218,6 +250,7 @@ export default function Contact() {
 
               <button
                 type="submit"
+                disabled={isSending}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
               >
                 <svg
