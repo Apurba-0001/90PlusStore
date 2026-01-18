@@ -12,7 +12,7 @@ dist/
 .cache/
 
 ### Env/Secrets
-.env*
+.env
 .env.local
 .env.production
 
