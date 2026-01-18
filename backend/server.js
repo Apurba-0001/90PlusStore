@@ -22,6 +22,13 @@ app.get("/ping", (req, res) => {
   res.status(200).type("text").send("OK");
 });
 
+
+// Database connection
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("MongoDB connection failed:", err.message));
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
@@ -36,38 +43,21 @@ app.get("/api/health", (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Root
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "OK",
     service: "90PlusStore Backend",
-    environment: process.env.NODE_ENV,
+    environment: process.env.NODE_ENV
   });
 });
+
 
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-/* ===================== DATABASE + SERVER START ===================== */
-
-// Disable mongoose buffering - queries will fail immediately if not connected
-mongoose.set("bufferCommands", false);
-
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    family: 4, // Force IPv4
-  })
-  .then(() => {
-    console.log("MongoDB connected");
-
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("MongoDB connection failed:", err.message);
-    process.exit(1);
-  });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
