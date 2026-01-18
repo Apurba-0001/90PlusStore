@@ -7,7 +7,7 @@ import { authMiddleware, adminMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Public route - anyone can view settings
+// Public route - anyone can view settings (no cache - settings affect pricing)
 router.get("/", getSettings);
 
 // Protected admin route - only admins can update

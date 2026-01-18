@@ -1,5 +1,10 @@
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import {
+  clearProductCache,
+  clearProductListCaches,
+  clearFeaturedCache,
+} from "../middleware/cache.js";
 
 export const getAllProducts = async (req, res) => {
   try {
@@ -110,6 +115,10 @@ export const createProduct = async (req, res) => {
     });
 
     await product.save();
+
+    // Clear product cache
+    await clearProductListCaches();
+
     res.status(201).json({
       message: "Product created successfully",
       product,
@@ -165,12 +174,16 @@ export const updateProduct = async (req, res) => {
         gender: gender || "Men",
         availableSizes: availableSizes || [],
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Clear specific product cache and lists (details changed)
+    await clearProductCache(req.params.id);
+    await clearProductListCaches();
 
     res.json({
       message: "Product updated successfully",
@@ -187,6 +200,11 @@ export const deleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Clear specific product cache and lists (product removed)
+    await clearProductCache(req.params.id);
+    await clearProductListCaches();
+
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -243,7 +261,7 @@ export const addReview = async (req, res) => {
 
     // Check if user has already reviewed this product
     const existingReview = product.reviews.find(
-      (review) => review.userId.toString() === user._id.toString()
+      (review) => review.userId.toString() === user._id.toString(),
     );
 
     if (existingReview) {
@@ -268,6 +286,9 @@ export const addReview = async (req, res) => {
     product.rating = calculateAverageRating(product.reviews);
 
     await product.save();
+
+    // Clear only this specific product's cache (reviews changed)
+    await clearProductCache(productId);
 
     res.status(201).json({
       message: "Review added successfully",
@@ -354,6 +375,9 @@ export const deleteReview = async (req, res) => {
     product.rating = calculateAverageRating(product.reviews);
     await product.save();
 
+    // Clear only this specific product's cache (reviews changed)
+    await clearProductCache(productId);
+
     return res.json({
       message: "Review deleted",
       rating: product.rating,
@@ -387,6 +411,10 @@ export const toggleFeaturedProduct = async (req, res) => {
 
     product.isFeatured = !product.isFeatured;
     await product.save();
+
+    // Clear featured cache and specific product (featured status changed)
+    await clearFeaturedCache();
+    await clearProductCache(req.params.id);
 
     res.json({
       message: `Product ${

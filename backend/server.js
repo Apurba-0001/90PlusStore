@@ -17,6 +17,7 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import { errorHandler } from "./middleware/auth.js";
+import { connectRedis } from "./config/redis.js";
 
 const app = express();
 
@@ -35,6 +36,14 @@ mongoose
   .connect(process.env.MONGODB_URI, { family: 4 })
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB connection failed:", err.message));
+
+// Redis connection (optional, won't break app if it fails)
+connectRedis().catch((err) =>
+  console.log(
+    "⚠️ Redis connection failed, running without cache:",
+    err.message,
+  ),
+);
 
 // Routes
 app.use("/api/auth", authRoutes);
