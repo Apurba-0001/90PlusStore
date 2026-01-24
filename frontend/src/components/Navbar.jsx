@@ -78,7 +78,7 @@ export default function Navbar() {
           >
             <img
               src="/logo.png"
-              alt="90PlusStore Logo"
+              alt="⚽"
               className="h-16 w-auto"
             />
           </Link>
