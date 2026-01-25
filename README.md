@@ -10,7 +10,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-darkgreen.svg)](https://www.mongodb.com/cloud/atlas)
 [![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
 
-[Live Demo](#) • [Documentation](#api-endpoints) • [Issues](https://github.com/Apurba-0001/90PlusStore/issues) • [Support](#support)
+[Live Demo](https://nine0plusstore.onrender.com) • [Documentation](#api-endpoints) • [Issues](https://github.com/Apurba-0001/90PlusStore/issues) • [Support](#support)
 
 </div>
 
@@ -26,10 +26,11 @@
 - [API Endpoints](#-api-endpoints)
 - [Deployment](#-deployment)
 - [Environment Setup](#-environment-variables)
+- [Documentation](#-documentation)
 - [Security](#-security-considerations)
 - [Contributing](#-contributing)
-- [License](#-license)
 - [Support](#-support)
+- [License](#-license)
 
 ---
 
@@ -375,40 +376,46 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrit
 5. Configure settings:
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
+   - **Root Directory**: `backend`
 6. Add environment variables:
    - `MONGODB_URI`
    - `JWT_SECRET`
    - `NODE_ENV=production`
 7. Deploy
 
-Backend URL will be: `https://your-app-name.onrender.com`
+Backend URL will be: `https://your-backend-name.onrender.com`
 
-### Deploy Frontend on Vercel
+### Deploy Frontend on Render
 
-1. Visit [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Configure:
-   - **Framework**: Vite
-   - **Root Directory**: `frontend`
-5. Add environment variable:
-   - `VITE_API_URL=https://your-backend-url.com/api`
-6. Deploy
-
-Frontend URL will be: `https://your-app-name.vercel.app`
-
-### Alternative: Deploy Frontend on Netlify
-
-1. Visit [Netlify](https://netlify.com)
-2. Click "New site from Git"
-3. Connect GitHub repository
-4. Configure:
-   - **Base Directory**: `frontend`
+1. Push your code to GitHub
+2. Visit [Render Dashboard](https://dashboard.render.com)
+3. Create a new Static Site
+4. Connect your GitHub repository
+5. Configure settings:
    - **Build Command**: `npm run build`
-   - **Publish Directory**: `dist`
-5. Add environment variable:
-   - `VITE_API_URL=https://your-backend-url.com/api`
-6. Deploy
+   - **Publish Directory**: `frontend/dist`
+   - **Root Directory**: `frontend`
+6. Add environment variable:
+   - `VITE_API_URL=https://your-backend-name.onrender.com/api`
+7. Deploy
+
+Frontend URL will be: `https://your-frontend-name.onrender.com`
+
+### Deployment Architecture
+
+```
+GitHub Repository
+    ↓
+├── Backend Service (Render Web Service)
+│   └── https://your-backend-name.onrender.com
+│
+└── Frontend Service (Render Static Site)
+    └── https://your-frontend-name.onrender.com
+
+Both connect to:
+├── MongoDB Atlas (Database)
+└── Redis (Optional Caching)
+```
 
 ## Building for Production
 
@@ -436,6 +443,7 @@ MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/90plusstore
 JWT_SECRET=your_super_secret_jwt_key
 PORT=5000
 NODE_ENV=production
+REDIS_URL=redis://default:password@localhost:6379 (optional)
 ```
 
 ### Frontend (.env)
@@ -443,6 +451,53 @@ NODE_ENV=production
 ```
 VITE_API_URL=https://your-backend-url.com/api
 ```
+
+---
+
+## 📚 Documentation
+
+### Getting Started
+
+- **[Setup Guide](./GETTING_STARTED.md)** - Step-by-step setup instructions
+- **[Installation](#-quick-start)** - Quick installation guide
+- **[API Documentation](./API_DOCUMENTATION.md)** - Detailed API reference
+
+### Development Guides
+
+- **[Frontend Development](./frontend/README.md)** - Frontend setup and guide
+- **[Backend Development](./backend/README.md)** - Backend setup and guide
+- **[Project Structure](#-project-structure)** - Understand the codebase
+
+### Deployment & DevOps
+
+- **[Deployment Guide](./DEPLOYMENT_GUIDE.md)** - Full deployment instructions
+- **[Deploy for Free](./DEPLOY_FREE.md)** - Free hosting alternatives
+- **[Technologies Used](./TECHNOLOGIES_USED.md)** - Tech stack details
+
+### Learning Resources
+
+- **[MERN Stack Documentation](https://www.mongodb.com/docs/manual/)** - MongoDB docs
+- **[React.js Guide](https://react.dev/)** - React official documentation
+- **[Express.js Documentation](https://expressjs.com/)** - Express.js guide
+- **[JWT Authentication](https://jwt.io/)** - JWT tokens explained
+
+### FAQ
+
+**Q: How do I add a new product category?**
+
+- Edit the `category` enum in [backend/models/Product.js](./backend/models/Product.js)
+
+**Q: How do I change the JWT expiration time?**
+
+- Modify the token expiry in [backend/controllers/authController.js](./backend/controllers/authController.js)
+
+**Q: How do I enable Redis caching?**
+
+- Set `REDIS_URL` in your .env and restart the backend server
+
+**Q: How do I deploy to production?**
+
+- See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed steps
 
 ## 🔐 Security Considerations
 
@@ -561,17 +616,31 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ## 💬 Support
 
-Need help? We're here for you!
+Need help? Multiple ways to get support:
+
+### Get Help
+
+| Channel              | Purpose           | Response Time   |
+| -------------------- | ----------------- | --------------- |
+| 📧 **Email**         | General inquiries | 24-48 hours     |
+| 🐛 **Bug Reports**   | Report issues     | 48-72 hours     |
+| 💬 **Discussions**   | Q&A & ideas       | Community-based |
+| 📖 **Documentation** | Read guides       | Anytime         |
+| 🚀 **Live Demo**     | Try it live       | Anytime         |
+
+### Contact Methods
 
 - 📧 **Email**: [90plusstore0@gmail.com](mailto:90plusstore0@gmail.com)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/Apurba-0001/90PlusStore/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/Apurba-0001/90PlusStore/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Apurba-0001/90PlusStore/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/Apurba-0001/90PlusStore/discussions)
+- 🔗 **Try Live**: [Visit Demo](https://nine0plusstore.onrender.com)
 
----
+### Before Asking for Help
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. ✅ Check [Documentation](#-documentation)
+2. ✅ Search [existing issues](https://github.com/Apurba-0001/90PlusStore/issues)
+3. ✅ Read [Troubleshooting](#-troubleshooting) section
+4. ✅ Review [FAQ](#faq)
 
 ---
 
