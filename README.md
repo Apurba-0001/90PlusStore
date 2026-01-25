@@ -1,293 +1,410 @@
-# 90PlusStore
+# 90PlusStore - MERN Stack E-Commerce Application
 
-A Production-Ready MERN Stack E-Commerce Application for Football Merchandise
+A production-ready, full-stack e-commerce application for football merchandise built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-v14+-green.svg)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-v18-blue.svg)](https://react.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-darkgreen.svg)](https://www.mongodb.com/cloud/atlas)
-[![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
+## Features
 
-[Live Demo](https://nine0plusstore.onrender.com) • [Documentation](#documentation) • [Issues](https://github.com/Apurba-0001/90PlusStore/issues) • [Support](#support)
+### User Features
 
-## Who This Is For
+- ✅ User authentication (Register/Login)
+- ✅ JWT-based session management
+- ✅ Product browsing with category filters
+- ✅ Search functionality
+- ✅ Shopping cart management
+- ✅ Checkout and order placement
+- ✅ Order tracking
+- ✅ User profile management
+- ✅ Responsive design (Mobile, Tablet, Desktop)
 
-**Beginners to intermediate MERN learners** who want to build a complete, real-world e-commerce application without starting from scratch. Perfect for portfolios, learning projects, or as a foundation for customization.
+### Admin Features
 
-## What You Will Learn
+- ✅ Admin dashboard with analytics
+- ✅ Product management (Create, Read, Update, Delete)
+- ✅ Stock management
+- ✅ Order management and status updates
+- ✅ Order tracking
+- ✅ Role-based access control
 
-- **JWT Authentication** — Implement secure token-based user authentication
-- **Role-Based Access Control** — Build admin-only features with middleware
-- **CRUD Operations** — Full MongoDB data operations (Create, Read, Update, Delete)
-- **State Management** — React Context API for global app state (auth, cart, wishlist)
-- **Deployment** — Deploy a production MERN app for free on Render
-- **RESTful API Design** — Build scalable backend endpoints with Express
-- **Database Modeling** — Design and query MongoDB schemas
-- **Real-World Features** — Shopping cart, orders, reviews, admin dashboard
+### Product Categories
 
----
-
-## Why This Project Is Great for Learning
-
-- **Complete Platform** — Full e-commerce solution from product browsing to order tracking
-- **Production-Ready** — JWT auth, RBAC, input validation, secure deployments
-- **Optimized** — Redis caching, CDN images, lazy loading, paginated queries
-- **Modular** — Clean architecture makes it easy to add features
-
-## Features by Learning Concept
-
-**Authentication & Security**
-
-- User registration and JWT-based login
-- Password hashing with bcryptjs
-- Protected routes (frontend & backend)
-- Role-based access control (RBAC) for admin features
-
-**State Management**
-
-- Context API for auth state (login/logout)
-- Cart state management (add, remove, update)
-- Wishlist persistence across page reloads
-
-**Data & Database**
-
-- MongoDB schema design with Mongoose
-- Product catalog with reviews and ratings
-- Order management with status tracking
-- User profile with multiple addresses
-
-**Admin Workflows**
-
-- Add/edit/delete products
-- Manage featured products
-- View and update order status
-- User management (view, make admin)
-
-**Product Categories:** Jerseys, Jackets, Footwear, Shorts, Tracksuits, Collectibles, Accessories
+- Jerseys
+- Boots
+- Shirts
+- Shorts
+- Special Collectibles
 
 ## Tech Stack
 
 ### Frontend
 
 - React 18
-- Vite (Fast build tool)
+- Vite
 - React Router v6
 - Axios
 - Tailwind CSS
-- Context API for state management (Auth, Cart, Wishlist)
+- Context API for state management
 
 ### Backend
 
 - Node.js
 - Express.js
-- MongoDB with Mongoose
+- MongoDB (Atlas)
+- Mongoose
 - JWT for authentication
 - bcryptjs for password hashing
-- Redis for caching (optional)
-- CORS for secure API access
-
-### Storage & Services
-
-- **Image Storage**: ImageKit (for product images and user avatars)
-- **Database**: MongoDB Atlas
-- **Cache**: Redis (optional)
 
 ### Deployment
 
-- Frontend: Render
+- Frontend: Vercel or Netlify
 - Backend: Render
 - Database: MongoDB Atlas (free tier)
-- Image Storage: ImageKit
-- Cache: Redis
 
-## Quick Start
+## Project Structure
 
-**Prerequisites:** Node.js (v14+), MongoDB Atlas (free tier), Git
-
-**Note:** Payment gateways are not implemented yet—orders work with test data. Redis caching is optional and safe to skip for beginners.
-
-### 1. Start the Backend
-
-This runs the Express server with all API endpoints (user auth, products, orders, admin features).
-
-```bash
-# Terminal 1
-git clone https://github.com/Apurba-0001/90PlusStore.git
-cd 90PlusStore/backend
-npm install
-npm start
+```
+90plusstore/
+├── backend/
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Product.js
+│   │   └── Order.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── productRoutes.js
+│   │   └── orderRoutes.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── productController.js
+│   │   └── orderController.js
+│   ├── middleware/
+│   │   └── auth.js
+│   ├── server.js
+│   ├── package.json
+│   ├── .env.example
+│   └── .env
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── ProductCard.jsx
+│   │   │   └── ProtectedRoute.jsx
+│   │   ├── pages/
+│   │   │   ├── Home.jsx
+│   │   │   ├── Products.jsx
+│   │   │   ├── ProductDetail.jsx
+│   │   │   ├── Cart.jsx
+│   │   │   ├── Checkout.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── Profile.jsx
+│   │   │   └── admin/
+│   │   │       ├── AdminDashboard.jsx
+│   │   │       ├── AdminProducts.jsx
+│   │   │       ├── AdminProductForm.jsx
+│   │   │       └── AdminOrders.jsx
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── CartContext.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   └── services.js
+│   │   ├── styles/
+│   │   │   └── index.css
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── package.json
+│   ├── .env.example
+│   └── .env
+│
+└── README.md
 ```
 
-### 2. Start the Frontend
+## Prerequisites
 
-This runs the React development server with hot reload (auto-refresh on code changes).
+- Node.js (v14 or higher)
+- npm or yarn
+- MongoDB Atlas account (free)
+- Git
+
+## Local Setup
+
+### 1. Clone the Repository
 
 ```bash
-# Terminal 2 (keep terminal 1 running)
-cd 90PlusStore/frontend
+git clone https://github.com/yourusername/90plusstore.git
+cd 90plusstore
+```
+
+### 2. Backend Setup
+
+```bash
+cd backend
+
+# Install dependencies
 npm install
+
+# Create .env file (copy from .env.example)
+cp .env.example .env
+
+# Update .env with your credentials:
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/90plusstore
+# JWT_SECRET=your_super_secret_key
+
+# Start the development server
 npm run dev
 ```
 
-Browser opens at `http://localhost:5173` — you're ready to explore!
+The backend will run on `http://localhost:5000`
 
-→ **[See GETTING_STARTED.md](./GETTING_STARTED.md)** for demo credentials, MongoDB setup, and troubleshooting
+### 3. Frontend Setup
 
----
+```bash
+cd frontend
 
-## Deployment
+# Install dependencies
+npm install
 
-Deploy both frontend and backend on **[Render](https://render.com)** (free tier available)
+# Create .env file (copy from .env.example)
+cp .env.example .env
 
-→ **[See DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** for step-by-step instructions, security checklist, and performance optimization
-
----
-
-## Documentation — Suggested Reading Order
-
-Start here and progress through each guide in order:
-
-| #   | Document                                       | When to Read                      | Purpose                                                              |
-| --- | ---------------------------------------------- | --------------------------------- | -------------------------------------------------------------------- |
-| 1️⃣  | [GETTING_STARTED.md](./GETTING_STARTED.md)     | **Before running the app**        | Local setup, MongoDB Atlas config, demo credentials, troubleshooting |
-| 2️⃣  | [Backend README](./backend/README.md)          | **After Quick Start works**       | Understand backend architecture, controllers, routes, middleware     |
-| 3️⃣  | [Frontend README](./frontend/README.md)        | **While exploring frontend code** | Understand component structure, Context API usage, state flow        |
-| 4️⃣  | [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | **When building features**        | Complete endpoint reference (request/response examples)              |
-| 5️⃣  | [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)   | **When ready to deploy**          | Deploy to Render, security checklist, production setup               |
-| 6️⃣  | [TECHNOLOGIES_USED.md](./TECHNOLOGIES_USED.md) | **For dependency details**        | Package versions, why each tech was chosen                           |
-| 7️⃣  | [DEPLOY_FREE.md](./DEPLOY_FREE.md)             | **Exploring alternatives**        | Other free hosting options                                           |
-
-**Optional Services Clarification:**
-
-- **MongoDB Atlas** ✅ Required — Stores all data
-- **ImageKit** ✅ Required — Displays product images (already configured with sample images)
-- **Redis** ❌ Optional — Speeds up queries; skip it while learning
-- **GitHub** ✅ Required — For deployment (code hosting)
-
-## How It Works (High-Level Architecture)
-
-```
-User Types: Login in Browser → Frontend (React) → Backend (Express) → MongoDB → Response Back
-                                  ↓
-                              Context API manages:
-                              • Auth state (logged in?)
-                              • Shopping cart
-                              • Wishlist
+# Start the development server
+npm run dev
 ```
 
-**Where Business Logic Lives:**
+The frontend will run on `http://localhost:3000`
 
-- Backend `/controllers` — Authentication, product CRUD, order processing
-- Backend `/middleware` — JWT verification, role checking
-- Frontend `/context` — Global state (auth, cart, wishlist)
-- Frontend `/pages` — User flows (browse, cart, checkout)
-- Frontend `/components` — Reusable UI pieces
+## API Endpoints
 
-**Where Authentication is Enforced:**
+### Authentication
 
-- Backend: `auth.js` middleware checks JWT on protected routes
-- Frontend: `ProtectedRoute.jsx` redirects non-logged-in users
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/profile` - Get user profile (protected)
+- `PUT /api/auth/profile` - Update user profile (protected)
 
----
+### Products
 
-## Security & Performance
+- `GET /api/products` - Get all products (with pagination and filtering)
+- `GET /api/products/:id` - Get product by ID
+- `GET /api/products/categories` - Get all categories
+- `POST /api/products` - Create product (admin only)
+- `PUT /api/products/:id` - Update product (admin only)
+- `DELETE /api/products/:id` - Delete product (admin only)
 
-**Security:** JWT authentication (7-day expiration) • bcryptjs password hashing (10 rounds) • Role-based access control • Input validation (client & server) • CORS configuration
+### Orders
 
-**Performance:** Redis caching • Pagination for large datasets • Indexed MongoDB queries • Vite fast builds • React Router lazy loading • CDN-optimized images
+- `POST /api/orders` - Create order (protected)
+- `GET /api/orders/my-orders` - Get user's orders (protected)
+- `GET /api/orders/:id` - Get order by ID (protected)
+- `PUT /api/orders/:id/status` - Update order status (admin only)
+- `GET /api/orders/admin/all-orders` - Get all orders (admin only)
 
-→ **[Full details in DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
+## Demo Credentials
 
-## Try This First — Beginner Checklist
+### Admin Account
 
-After setup completes, test these core features:
+- Email: `admin@90plusstore.com`
+- Password: `admin123`
 
-- [ ] **Create Account** — Register with your email
-- [ ] **Login** — Use your credentials to log in
-- [ ] **Browse Products** — Explore the product catalog
-- [ ] **Add to Cart** — Click "Add to Cart" on a product
-- [ ] **View Cart** — Check your cart items
-- [ ] **Place Test Order** — Complete checkout (use test payment)
-- [ ] **View Order History** — Check your profile
-- [ ] **Admin Dashboard** — Login as admin@example.com, see admin features
-- [ ] **Add Product** (Admin) — Try creating a new product
+### Regular User
 
-If any step fails, check [GETTING_STARTED.md](./GETTING_STARTED.md#troubleshooting) troubleshooting section.
+- Email: `user@90plusstore.com`
+- Password: `user123`
 
----
+## MongoDB Atlas Setup
 
-## Common Beginner Mistakes
+1. Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a free account
+3. Create a new cluster (free tier)
+4. Create a database user with username and password
+5. Add your IP to the whitelist
+6. Get the connection string and update `.env`
 
-**CORS Errors?** — Frontend and backend on different ports. Check `.env` has correct `VITE_API_URL`
+Example connection string:
 
-**MongoDB won't connect?** — IP whitelist issue. Go to MongoDB Atlas → Network Access → whitelist your IP
+```
+mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrites=true&w=majority
+```
 
-**"API URL undefined" errors?** — Missing `.env` file in frontend or backend. Copy from `.env.example`
+## Deployment Guide
 
-**Can't login?** — Use demo credentials from [GETTING_STARTED.md](./GETTING_STARTED.md#demo-accounts), not random email
+### Deploy Backend on Render
 
-**Images not loading?** — ImageKit is set up with sample images; custom uploads require ImageKit dashboard access
+1. Push your code to GitHub
+2. Visit [Render Dashboard](https://dashboard.render.com)
+3. Create a new Web Service
+4. Connect your GitHub repository
+5. Configure settings:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+6. Add environment variables:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `NODE_ENV=production`
+7. Deploy
 
----
+Backend URL will be: `https://your-app-name.onrender.com`
+
+### Deploy Frontend on Vercel
+
+1. Visit [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click "New Project"
+3. Import your GitHub repository
+4. Configure:
+   - **Framework**: Vite
+   - **Root Directory**: `frontend`
+5. Add environment variable:
+   - `VITE_API_URL=https://your-backend-url.com/api`
+6. Deploy
+
+Frontend URL will be: `https://your-app-name.vercel.app`
+
+### Alternative: Deploy Frontend on Netlify
+
+1. Visit [Netlify](https://netlify.com)
+2. Click "New site from Git"
+3. Connect GitHub repository
+4. Configure:
+   - **Base Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Publish Directory**: `dist`
+5. Add environment variable:
+   - `VITE_API_URL=https://your-backend-url.com/api`
+6. Deploy
+
+## Building for Production
+
+### Backend
+
+```bash
+cd backend
+npm start  # Runs on PORT specified in .env
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run build  # Creates optimized build in dist/
+npm run preview  # Preview the build
+```
+
+## Environment Variables
+
+### Backend (.env)
+
+```
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/90plusstore
+JWT_SECRET=your_super_secret_jwt_key
+PORT=5000
+NODE_ENV=production
+```
+
+### Frontend (.env)
+
+```
+VITE_API_URL=https://your-backend-url.com/api
+```
+
+## Security Considerations
+
+1. **JWT Secret**: Change the default JWT secret in production
+2. **CORS**: Backend includes CORS configuration for secure API access
+3. **Password Hashing**: Passwords are hashed using bcryptjs
+4. **Environment Variables**: Keep sensitive data in .env files (not in Git)
+5. **Validation**: All inputs are validated on both client and server
+6. **Role-Based Access**: Admin routes are protected with role verification
+
+## Performance Optimization
+
+- **Frontend**: Vite for fast build times and development
+- **Caching**: Browser caching headers configured
+- **Pagination**: Products and orders are paginated
+- **Lazy Loading**: Images lazy-loaded in product cards
+- **Minification**: Production builds are minified
+
+## Troubleshooting
+
+### MongoDB Connection Error
+
+- Check if your IP is whitelisted in MongoDB Atlas
+- Verify connection string in .env
+- Ensure database user has correct permissions
+
+### CORS Errors
+
+- Verify backend CORS configuration
+- Check if frontend API URL matches backend URL
+
+### Port Already in Use
+
+```bash
+# Linux/Mac
+lsof -i :5000  # Find process on port 5000
+kill -9 <PID>
+
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+```
+
+### JWT Token Expired
+
+- Token expires after 7 days
+- Users need to login again for new token
+
+## Testing Endpoints with cURL
+
+```bash
+# Register
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John","email":"john@example.com","password":"pass123"}'
+
+# Login
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"john@example.com","password":"pass123"}'
+
+# Get Products
+curl http://localhost:5000/api/products
+
+# Get Categories
+curl http://localhost:5000/api/products/categories
+```
 
 ## Contributing
 
-We welcome contributions! Here's how you can help:
-
-### Process
-
 1. Fork the repository
-2. Create a feature branch
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-3. Commit your changes
-   ```bash
-   git commit -m 'Add AmazingFeature'
-   ```
-4. Push to the branch
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-### Guidelines
-
-- Follow existing code style and conventions
-- Add tests for new features
-- Update documentation as needed
-- Keep commits clean and descriptive
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see LICENSE file for details.
 
 ## Support
 
-**Email:** [90plusstore0@gmail.com](mailto:90plusstore0@gmail.com)  
-**Issues:** [GitHub Issues](https://github.com/Apurba-0001/90PlusStore/issues)  
-**Discussions:** [GitHub Discussions](https://github.com/Apurba-0001/90PlusStore/discussions)  
-**Live Demo:** [nine0plusstore.onrender.com](https://nine0plusstore.onrender.com)
-
-Before asking for help, check [Documentation](#documentation) and search [existing issues](https://github.com/Apurba-0001/90PlusStore/issues).
-
----
+For support, email 90plusstore0@gmail.com or open an issue on GitHub.
 
 ## Future Enhancements
 
-- [ ] Payment gateway integration (Stripe, PayPal, Razorpay)
-- [ ] Email notifications (Order confirmation, Shipping updates)
-- [ ] Advanced sales analytics with charts
-- [ ] Multi-language support (i18n)
-- [ ] Dark mode theme
-- [ ] Two-factor authentication (2FA)
-- [ ] Social media integration (Login with Google/Facebook)
-- [ ] Product recommendations engine
-- [ ] Bulk product upload (CSV/Excel)
-- [ ] Advanced inventory tracking
-- [ ] Customer support chat
-- [ ] Product comparison feature
+- [ ] Payment gateway integration (Stripe, PayPal)
+- [ ] Email notifications
+- [ ] Sales analytics
+- [ ] Multi-language support
+- [ ] Dark mode
+- [ ] Two-factor authentication
+- [ ] Social media integration
 
 ---
 
-**Built by [Apurba Maji](https://github.com/Apurba-0001)** • [View on GitHub](https://github.com/Apurba-0001/90PlusStore)
+**Made with ❤️ by Apurba Maji**
