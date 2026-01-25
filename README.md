@@ -1,6 +1,39 @@
-# 90PlusStore - MERN Stack E-Commerce Application
+<div align="center">
 
-A production-ready, full-stack e-commerce application for football merchandise built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
+# 🏟️ 90PlusStore
+
+#### A Production-Ready MERN Stack E-Commerce Application for Football Merchandise
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-v14+-green.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-v18-blue.svg)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-darkgreen.svg)](https://www.mongodb.com/cloud/atlas)
+[![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
+
+[Live Demo](#) • [Documentation](#api-endpoints) • [Issues](https://github.com/Apurba-0001/90PlusStore/issues) • [Support](#support)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [API Endpoints](#-api-endpoints)
+- [Deployment](#-deployment)
+- [Environment Setup](#-environment-variables)
+- [Security](#-security-considerations)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Support](#-support)
+
+---
+
+## ✨ Features
 
 ## Features
 
@@ -9,78 +42,104 @@ A production-ready, full-stack e-commerce application for football merchandise b
 - ✅ User authentication (Register/Login)
 - ✅ JWT-based session management
 - ✅ Product browsing with category filters
-- ✅ Search functionality
-- ✅ Shopping cart management
+- ✅ Search and filtering functionality
+- ✅ Shopping cart management (add, remove, update quantity, clear)
+- ✅ Wishlist functionality (save favorites, toggle items)
+- ✅ Product reviews and ratings
 - ✅ Checkout and order placement
-- ✅ Order tracking
+- ✅ Multiple address support (shipping & billing)
+- ✅ Order tracking and history
 - ✅ User profile management
 - ✅ Responsive design (Mobile, Tablet, Desktop)
+- ✅ Loading skeletons for better UX
 
 ### Admin Features
 
 - ✅ Admin dashboard with analytics
 - ✅ Product management (Create, Read, Update, Delete)
-- ✅ Stock management
+- ✅ Featured products management
+- ✅ Stock management with size variants
+- ✅ Product reviews management (edit, delete reviews)
 - ✅ Order management and status updates
-- ✅ Order tracking
+- ✅ User management (view, remove users)
 - ✅ Role-based access control
+- ✅ Make user admin functionality
+
+### Product Features
+
+- ✅ Multiple product images
+- ✅ Size variants (XS-XXL for clothing, shoe sizes 6-14)
+- ✅ Gender categories (Men, Women, Kids, All)
+- ✅ Product ratings and reviews system
+- ✅ Featured products showcase
+- ✅ Stock tracking per size
 
 ### Product Categories
 
 - Jerseys
-- Boots
-- Shirts
+- Jackets and Sweatshirts
+- Footwear
 - Shorts
+- Tracksuits
 - Special Collectibles
+- Accessories
 
-## Tech Stack
+## 🔧 Tech Stack
 
 ### Frontend
 
 - React 18
-- Vite
+- Vite (Fast build tool)
 - React Router v6
 - Axios
 - Tailwind CSS
-- Context API for state management
+- Context API for state management (Auth, Cart, Wishlist)
 
 ### Backend
 
 - Node.js
 - Express.js
-- MongoDB (Atlas)
-- Mongoose
+- MongoDB with Mongoose
 - JWT for authentication
 - bcryptjs for password hashing
+- Redis for caching (optional)
+- CORS for secure API access
 
 ### Deployment
 
-- Frontend: Vercel or Netlify
+- Frontend: Render
 - Backend: Render
 - Database: MongoDB Atlas (free tier)
+- Cache: Redis
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 90plusstore/
 ├── backend/
 │   ├── models/
-│   │   ├── User.js
-│   │   ├── Product.js
-│   │   └── Order.js
+│   │   ├── User.js          (User schema with address, avatar, phone)
+│   │   ├── Product.js       (Product schema with reviews, ratings, sizes)
+│   │   ├── Order.js         (Order schema with shipping/billing address)
+│   │   └── Settings.js      (App settings)
 │   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── productRoutes.js
-│   │   └── orderRoutes.js
+│   │   ├── authRoutes.js    (Auth, Cart, Wishlist endpoints)
+│   │   ├── productRoutes.js (Products, Reviews, Featured)
+│   │   ├── orderRoutes.js   (Order management)
+│   │   └── settingsRoutes.js
 │   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── productController.js
-│   │   └── orderController.js
+│   │   ├── authController.js    (Auth, Cart, Wishlist logic)
+│   │   ├── productController.js (Product & Review logic)
+│   │   ├── orderController.js   (Order logic)
+│   │   └── settingsController.js
 │   ├── middleware/
-│   │   └── auth.js
+│   │   ├── auth.js              (JWT verification, admin check)
+│   │   └── cache.js             (Redis caching middleware)
+│   ├── migrations/              (Database migrations)
+│   ├── config/
+│   │   └── redis.js             (Redis configuration)
 │   ├── server.js
 │   ├── package.json
-│   ├── .env.example
 │   └── .env
 │
 ├── frontend/
@@ -89,27 +148,42 @@ A production-ready, full-stack e-commerce application for football merchandise b
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── Footer.jsx
 │   │   │   ├── ProductCard.jsx
-│   │   │   └── ProtectedRoute.jsx
+│   │   │   ├── ProductSkeleton.jsx       (Loading state)
+│   │   │   ├── ProductDetailSkeleton.jsx (Loading state)
+│   │   │   ├── ProtectedRoute.jsx
+│   │   │   ├── StarRating.jsx            (Rating component)
+│   │   │   └── ScrollToTop.jsx
 │   │   ├── pages/
 │   │   │   ├── Home.jsx
-│   │   │   ├── Products.jsx
-│   │   │   ├── ProductDetail.jsx
+│   │   │   ├── Products.jsx      (With filters & search)
+│   │   │   ├── ProductDetail.jsx (With reviews & ratings)
 │   │   │   ├── Cart.jsx
 │   │   │   ├── Checkout.jsx
 │   │   │   ├── Login.jsx
 │   │   │   ├── Register.jsx
 │   │   │   ├── Profile.jsx
+│   │   │   ├── Wishlist.jsx
+│   │   │   ├── Orders.jsx        (Order history)
+│   │   │   ├── About.jsx
+│   │   │   ├── Contact.jsx
+│   │   │   ├── Shipping.jsx
+│   │   │   ├── Returns.jsx
 │   │   │   └── admin/
-│   │   │       ├── AdminDashboard.jsx
-│   │   │       ├── AdminProducts.jsx
-│   │   │       ├── AdminProductForm.jsx
-│   │   │       └── AdminOrders.jsx
+│   │   │       ├── AdminDashboard.jsx  (Analytics & overview)
+│   │   │       ├── AdminProducts.jsx   (Product list & management)
+│   │   │       ├── AdminProductForm.jsx (Add/Edit products)
+│   │   │       ├── AdminOrders.jsx     (Order management)
+│   │   │       ├── AdminUsers.jsx      (User management)
+│   │   │       ├── AdminFeatured.jsx   (Featured products)
+│   │   │       ├── UserCard.jsx
+│   │   │       └── UserDetails.jsx
 │   │   ├── context/
-│   │   │   ├── AuthContext.jsx
-│   │   │   └── CartContext.jsx
+│   │   │   ├── AuthContext.jsx     (User auth state)
+│   │   │   ├── CartContext.jsx     (Cart state)
+│   │   │   └── WishlistContext.jsx (Wishlist state)
 │   │   ├── services/
-│   │   │   ├── api.js
-│   │   │   └── services.js
+│   │   │   ├── api.js              (Axios instance with interceptors)
+│   │   │   └── services.js         (API service methods)
 │   │   ├── styles/
 │   │   │   └── index.css
 │   │   ├── App.jsx
@@ -119,22 +193,54 @@ A production-ready, full-stack e-commerce application for football merchandise b
 │   ├── tailwind.config.js
 │   ├── postcss.config.js
 │   ├── package.json
-│   ├── .env.example
 │   └── .env
 │
 └── README.md
 ```
 
-## Prerequisites
+## 📋 Prerequisites
 
 - Node.js (v14 or higher)
 - npm or yarn
 - MongoDB Atlas account (free)
 - Git
 
-## Local Setup
+## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Apurba-0001/90PlusStore.git
+cd 90plusstore
+
+# 2. Backend Setup
+cd backend
+npm install
+cp .env.example .env
+# Update .env with your MongoDB URI and JWT secret
+npm run dev
+
+# 3. Frontend Setup (in a new terminal)
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+**Backend:** http://localhost:5000  
+**Frontend:** http://localhost:3000
+
+### Demo Accounts
+
+| Role  | Email                   | Password   |
+| ----- | ----------------------- | ---------- |
+| Admin | `admin@90plusstore.com` | `admin123` |
+| User  | `user@90plusstore.com`  | `user123`  |
+
+---
+
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/yourusername/90plusstore.git
@@ -179,7 +285,7 @@ npm run dev
 
 The frontend will run on `http://localhost:3000`
 
-## API Endpoints
+## 📡 API Endpoints
 
 ### Authentication
 
@@ -187,23 +293,49 @@ The frontend will run on `http://localhost:3000`
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/profile` - Get user profile (protected)
 - `PUT /api/auth/profile` - Update user profile (protected)
+- `GET /api/auth/users` - Get all users (admin only)
+- `DELETE /api/auth/users/:id` - Remove user (admin only)
+
+### Cart Management
+
+- `GET /api/auth/cart` - Get user's cart (protected)
+- `POST /api/auth/cart` - Add item to cart (protected)
+- `PATCH /api/auth/cart/:productId` - Update cart item quantity (protected)
+- `DELETE /api/auth/cart/:productId` - Remove item from cart (protected)
+- `DELETE /api/auth/cart` - Clear entire cart (protected)
+
+### Wishlist Management
+
+- `GET /api/auth/wishlist` - Get user's wishlist (protected)
+- `PATCH /api/auth/wishlist/:productId` - Toggle product in wishlist (protected)
 
 ### Products
 
 - `GET /api/products` - Get all products (with pagination and filtering)
 - `GET /api/products/:id` - Get product by ID
 - `GET /api/products/categories` - Get all categories
+- `GET /api/products/featured` - Get featured products
 - `POST /api/products` - Create product (admin only)
 - `PUT /api/products/:id` - Update product (admin only)
+- `PUT /api/products/:id/featured` - Toggle featured status (admin only)
 - `DELETE /api/products/:id` - Delete product (admin only)
+
+### Reviews & Ratings
+
+- `GET /api/products/:id/reviews` - Get product reviews
+- `POST /api/products/:id/reviews` - Add review (protected)
+- `PUT /api/products/:id/reviews/:reviewId` - Update review (admin only)
+- `DELETE /api/products/:id/reviews/:reviewId` - Delete review (admin only)
 
 ### Orders
 
 - `POST /api/orders` - Create order (protected)
 - `GET /api/orders/my-orders` - Get user's orders (protected)
-- `GET /api/orders/:id` - Get order by ID (protected)
+- `GET /api/orders/:id` - Get order details (protected)
 - `PUT /api/orders/:id/status` - Update order status (admin only)
-- `GET /api/orders/admin/all-orders` - Get all orders (admin only)
+- `GET /api/orders` - Get all orders (admin only)
+
+---
 
 ## Demo Credentials
 
@@ -232,7 +364,7 @@ Example connection string:
 mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrites=true&w=majority
 ```
 
-## Deployment Guide
+## 🌐 Deployment
 
 ### Deploy Backend on Render
 
@@ -295,7 +427,7 @@ npm run build  # Creates optimized build in dist/
 npm run preview  # Preview the build
 ```
 
-## Environment Variables
+## ⚙️ Environment Variables
 
 ### Backend (.env)
 
@@ -312,24 +444,40 @@ NODE_ENV=production
 VITE_API_URL=https://your-backend-url.com/api
 ```
 
-## Security Considerations
+## 🔐 Security Considerations
 
-1. **JWT Secret**: Change the default JWT secret in production
-2. **CORS**: Backend includes CORS configuration for secure API access
-3. **Password Hashing**: Passwords are hashed using bcryptjs
-4. **Environment Variables**: Keep sensitive data in .env files (not in Git)
-5. **Validation**: All inputs are validated on both client and server
-6. **Role-Based Access**: Admin routes are protected with role verification
+1. **JWT Authentication**: Secure token-based authentication with configurable expiration
+2. **JWT Secret**: Change the default JWT secret in production
+3. **Password Hashing**: Passwords hashed using bcryptjs (10 rounds)
+4. **CORS**: Backend includes CORS configuration for secure API access
+5. **Protected Routes**: Both frontend and backend route protection
+6. **Admin Middleware**: Role-based access control for admin endpoints
+7. **Environment Variables**: Keep sensitive data in .env files (not in Git)
+8. **Input Validation**: All inputs validated on both client and server
+9. **Address Storage**: Secure address data storage with multiple address support
+10. **Token Refresh**: JWT tokens expire after 7 days
 
-## Performance Optimization
+## ⚡ Performance Optimization
 
-- **Frontend**: Vite for fast build times and development
-- **Caching**: Browser caching headers configured
-- **Pagination**: Products and orders are paginated
-- **Lazy Loading**: Images lazy-loaded in product cards
-- **Minification**: Production builds are minified
+- **Frontend**:
+  - Vite for fast build times and development
+  - React Router lazy loading
+  - Loading skeletons for better perceived performance
+  - Context API for efficient state management
+- **Backend**:
+  - Redis caching for products, categories, and featured items
+  - Pagination for large datasets
+  - Indexed MongoDB queries
+  - HTTP compression
+  - Keep-alive ping endpoint for deployment services
 
-## Troubleshooting
+- **General**:
+  - Image optimization via URLs
+  - CSS minification with Tailwind
+  - Production build optimization
+  - Lazy image loading in product cards
+
+## 🛠️ Troubleshooting
 
 ### MongoDB Connection Error
 
@@ -359,7 +507,7 @@ taskkill /PID <PID> /F
 - Token expires after 7 days
 - Users need to login again for new token
 
-## Testing Endpoints with cURL
+## 🧪 Testing Endpoints with cURL
 
 ```bash
 # Register
@@ -379,32 +527,78 @@ curl http://localhost:5000/api/products
 curl http://localhost:5000/api/products/categories
 ```
 
-## Contributing
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### Process
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
+2. Create a feature branch
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes
+   ```bash
+   git commit -m 'Add AmazingFeature'
+   ```
+4. Push to the branch
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
 5. Open a Pull Request
 
-## License
+### Guidelines
+
+- Follow existing code style and conventions
+- Add tests for new features
+- Update documentation as needed
+- Keep commits clean and descriptive
+
+## 📄 License
 
 This project is licensed under the MIT License - see LICENSE file for details.
 
-## Support
+## 💬 Support
 
-For support, email 90plusstore0@gmail.com or open an issue on GitHub.
+Need help? We're here for you!
 
-## Future Enhancements
-
-- [ ] Payment gateway integration (Stripe, PayPal)
-- [ ] Email notifications
-- [ ] Sales analytics
-- [ ] Multi-language support
-- [ ] Dark mode
-- [ ] Two-factor authentication
-- [ ] Social media integration
+- 📧 **Email**: [90plusstore0@gmail.com](mailto:90plusstore0@gmail.com)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Apurba-0001/90PlusStore/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Apurba-0001/90PlusStore/discussions)
 
 ---
 
-**Made with ❤️ by Apurba Maji**
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🎯 Future Enhancements
+
+- [ ] Payment gateway integration (Stripe, PayPal, Razorpay)
+- [ ] Email notifications (Order confirmation, Shipping updates)
+- [ ] Advanced sales analytics with charts
+- [ ] Multi-language support (i18n)
+- [ ] Dark mode theme
+- [ ] Two-factor authentication (2FA)
+- [ ] Social media integration (Login with Google/Facebook)
+- [ ] Product recommendations engine
+- [ ] Bulk product upload (CSV/Excel)
+- [ ] Advanced inventory tracking
+- [ ] Customer support chat
+- [ ] Product comparison feature
+
+---
+
+<div align="center">
+
+### Made with ❤️ by [Apurba Maji](https://github.com/Apurba-0001)
+
+[![GitHub followers](https://img.shields.io/github/followers/Apurba-0001?style=social)](https://github.com/Apurba-0001)
+[![GitHub stars](https://img.shields.io/github/stars/Apurba-0001/90PlusStore?style=social)](https://github.com/Apurba-0001/90PlusStore)
+
+**[⬆ Back to top](#-90plusstore)**
+
+</div>
