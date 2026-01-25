@@ -22,8 +22,8 @@ _Designed for scalability, security, and optimal user experience across all devi
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![EmailJS](https://img.shields.io/badge/EmailJS-7B68EE?style=for-the-badge&logo=gmail&logoColor=white)
 
 </div>
 
@@ -74,16 +74,15 @@ _Designed for scalability, security, and optimal user experience across all devi
 |    ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=flat)    | NoSQL database                 |
 |    ![Mongoose](https://img.shields.io/badge/Mongoose-800?logo=mongoose&logoColor=white&style=flat)    | Object data modeling (ODM)     |
 |     ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white&style=flat)     | Secure authentication          |
+|       ![Axios](https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white&style=flat)       | HTTP client for API calls      |
 |       ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white&style=flat)       | In-memory caching layer        |
 
 ### 🚀 Deployment Infrastructure
 
-|                                                   Platform                                                    | Purpose              |
-| :-----------------------------------------------------------------------------------------------------------: | :------------------- |
-|         ![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=flat)          | Frontend Deployment  |
-|        ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?logo=netlify&logoColor=white&style=flat)        | Frontend Alternative |
-|         ![Render](https://img.shields.io/badge/Render-46E3B7?logo=render&logoColor=white&style=flat)          | Backend Deployment   |
-| ![MongoDB Atlas](https://img.shields.io/badge/MongoDB%20Atlas-47A248?logo=mongodb&logoColor=white&style=flat) | Database Hosting     |
+|                                                   Platform                                                    | Purpose                       |
+| :-----------------------------------------------------------------------------------------------------------: | :---------------------------- |
+|         ![Render](https://img.shields.io/badge/Render-46E3B7?logo=render&logoColor=white&style=flat)          | Frontend & Backend Deployment |
+| ![MongoDB Atlas](https://img.shields.io/badge/MongoDB%20Atlas-47A248?logo=mongodb&logoColor=white&style=flat) | Database Hosting              |
 
 ---
 
@@ -255,9 +254,13 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrit
 
 ---
 
-## Deployment Guide
+## 🚀 Deployment Guide
 
-### Deploy Backend to Render
+### Deploy Frontend & Backend to Render
+
+Both frontend and backend are deployed on Render:
+
+#### 1. Deploy Backend
 
 1. Push code to GitHub
 2. Access [Render Dashboard](https://dashboard.render.com)
@@ -266,40 +269,39 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrit
 5. Configure deployment:
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
+   - **Root Directory**: `backend`
 6. Set environment variables:
-   - `MONGODB_URI`: Your MongoDB connection string
+   - `MONGODB_URI`: Your MongoDB Atlas connection string
    - `JWT_SECRET`: Secure secret key
    - `NODE_ENV`: `production`
 7. Deploy
 
 **Backend URL**: `https://your-app-name.onrender.com`
 
-### Deploy Frontend to Vercel
+#### 2. Deploy Frontend
 
-1. Access [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Import GitHub repository
-4. Configure settings:
-   - **Framework**: Vite
-   - **Root Directory**: `frontend`
-5. Add environment variable:
-   - `VITE_API_URL`: `https://your-backend-url.onrender.com/api`
-6. Deploy
-
-**Frontend URL**: `https://your-app-name.vercel.app`
-
-### Alternative: Deploy Frontend to Netlify
-
-1. Visit [Netlify](https://netlify.com)
-2. Select "New site from Git"
-3. Connect GitHub repository
-4. Configure settings:
-   - **Base Directory**: `frontend`
+1. In [Render Dashboard](https://dashboard.render.com), create another Web Service
+2. Connect same GitHub repository
+3. Configure settings:
    - **Build Command**: `npm run build`
-   - **Publish Directory**: `dist`
-5. Add environment variable:
+   - **Start Command**: `npm run preview`
+   - **Root Directory**: `frontend`
+4. Set environment variable:
    - `VITE_API_URL`: `https://your-backend-url.onrender.com/api`
-6. Deploy
+5. Deploy
+
+**Frontend URL**: `https://your-frontend-app.onrender.com`
+
+### ImageKit Configuration for Product Images
+
+Product images are managed externally using ImageKit:
+
+1. Upload images to [ImageKit](https://imagekit.io)
+2. Copy the ImageKit URL for each image
+3. Store the image URL in MongoDB product documents
+4. Frontend fetches and displays images from the stored URLs in MongoDB
+
+_Note: ImageKit integration is handled manually during product setup, not directly in the application code._
 
 ---
 
