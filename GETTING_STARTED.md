@@ -1,404 +1,358 @@
-# 🎉 Welcome to 90PlusStore!
+# Getting Started with 90PlusStore
 
-## ✅ Your Production-Ready MERN E-Commerce Application is Complete!
+Welcome! This guide covers everything you need to set up 90PlusStore locally.
 
-**Status**: Fully built, tested, and ready to use
+## Prerequisites
 
----
+Before you begin, ensure you have:
 
-## 🚀 Get Started in 3 Steps
+- **Node.js** v14 or higher ([Download](https://nodejs.org/))
+- **Git** ([Download](https://git-scm.com/))
+- **MongoDB Atlas account** (free tier) ([Create here](https://www.mongodb.com/cloud/atlas))
+- **ImageKit account** (free tier) ([Create here](https://imagekit.io/))
 
-### Step 1: Backend Setup (1 minute)
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Apurba-0001/90PlusStore.git
+cd 90PlusStore
+```
+
+### 2. Backend Setup
 
 ```bash
 cd backend
 npm install
-npm run dev
 ```
 
-✅ Backend runs on `http://localhost:5000`
+Create a `.env` file in the `backend` directory:
 
-### Step 2: Frontend Setup (1 minute)
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+PORT=5000
+NODE_ENV=development
+REDIS_URL=redis://localhost:6379 (optional)
+```
+
+Start the backend server:
+
+```bash
+npm start
+```
+
+The backend will run on **http://localhost:5000**
+
+### 3. Frontend Setup
+
+In a new terminal:
 
 ```bash
 cd frontend
 npm install
+```
+
+Create a `.env` file in the `frontend` directory:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Start the frontend development server:
+
+```bash
 npm run dev
 ```
 
-✅ Frontend runs on `http://localhost:3000`
+The frontend will run on **http://localhost:5173**
 
-### Step 3: Open Your Browser
+## Demo Accounts
 
-```
-http://localhost:3000
-```
+Use these credentials to test all features:
 
-✅ Your app is ready to use!
+### Regular User
 
----
+- **Email**: `user@example.com`
+- **Password**: `password123`
 
-## 📚 Documentation
+### Admin User
 
-### Start Here 👇
+- **Email**: `admin@example.com`
+- **Password**: `admin123`
 
-- **[QUICK_START.md](./QUICK_START.md)** - 2-3 minute setup (Recommended)
-- **[INDEX.md](./INDEX.md)** - Complete documentation index
-- **[README.md](./README.md)** - Full project documentation
+**Note**: In production, create your own admin account through a proper registration process.
 
-### For Deployment
+## MongoDB Atlas Setup
 
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deploy to production (free!)
+### Step 1: Create Project and Cluster
 
-### For API Integration
+1. Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Sign up or log in
+3. Create a new project (or use default)
+4. Create a new cluster:
+   - Choose **M0 (free tier)**
+   - Select your region
+   - Click "Create Cluster"
 
-- **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** - Complete API reference
+### Step 2: Create Database User
 
----
+1. Go to **Database Access** in the left menu
+2. Click **Add New Database User**
+3. Enter username and password
+4. Select **Atlas admin** role
+5. Click **Add User**
 
-## 🎯 What You Have
+### Step 3: Whitelist IP Address
 
-✅ **Complete Backend**
+1. Go to **Network Access** in the left menu
+2. Click **Add IP Address**
+3. Select **Allow access from anywhere** (for development)
+   - **Note**: For production, enter specific IP addresses
+4. Click **Confirm**
 
-- Express.js API
-- User authentication (JWT)
-- Product management
-- Order processing
-- Admin controls
+### Step 4: Get Connection String
 
-✅ **Complete Frontend**
+1. Go back to **Clusters**
+2. Click **Connect** button on your cluster
+3. Choose **Connect your application**
+4. Copy the MongoDB URI
+5. Replace `<username>` and `<password>` with your database user credentials
+6. Paste into your `.env` file as `MONGODB_URI`
 
-- React application
-- Shopping cart
-- Checkout system
-- Admin dashboard
-- Fully responsive
-
-✅ **Database**
-
-- MongoDB setup instructions
-- Free tier compatible
-
-✅ **Documentation**
-
-- Setup guides
-- API reference
-- Deployment guide
-- Troubleshooting
-
----
-
-## 🧪 Test Accounts
-
-Ready to test immediately:
-
-**Admin Account:**
+**Example Connection String**:
 
 ```
-Email: admin@90plusstore.com
-Password: admin123
+mongodb+srv://myuser:mypassword@cluster0.xxxxx.mongodb.net/90plusstore?retryWrites=true&w=majority
 ```
 
-**Regular User:**
+## ImageKit Setup
 
-```
-Email: user@90plusstore.com
-Password: user123
-```
+### Step 1: Create ImageKit Account
 
----
+1. Visit [ImageKit](https://imagekit.io/)
+2. Sign up with email or GitHub
+3. Create a new project
 
-## 🌟 Features
+### Step 2: Get Your Credentials
 
-### Users Can
+1. Go to **Settings** → **Developer options**
+2. Note your **Public Key** and **URL Endpoint**
 
-- ✅ Register & Login
-- ✅ Browse products
-- ✅ Search & filter
-- ✅ Add to cart
-- ✅ Checkout
-- ✅ Track orders
-- ✅ Manage profile
+### Step 3: Upload Product Images
 
-### Admins Can
+1. Go to **Media Library**
+2. Create a folder called `products`
+3. Upload your product images
+4. Copy the ImageKit URL for each image (shown in the file details)
 
-- ✅ Access dashboard
-- ✅ Add products
-- ✅ Update products
-- ✅ Delete products
-- ✅ Manage orders
-- ✅ View analytics
+### Step 4: Add Images to Products
 
----
+MongoDB product document structure:
 
-## 📂 Project Structure
-
-```
-90plusstore/
-├── backend/          # Express.js backend API
-├── frontend/         # React + Vite frontend
-├── README.md         # Main documentation
-├── QUICK_START.md    # Quick setup guide
-├── DEPLOYMENT_GUIDE.md # How to deploy
-└── API_DOCUMENTATION.md # API reference
+```javascript
+{
+  "name": "Jersey Name",
+  "price": 99.99,
+  "images": [
+    {
+      "url": "https://ik.imagekit.io/your-key/products/jersey-front.jpg",
+      "alt": "Front view"
+    },
+    {
+      "url": "https://ik.imagekit.io/your-key/products/jersey-back.jpg",
+      "alt": "Back view"
+    }
+  ]
+}
 ```
 
----
+**No backend code integration needed** - just store the URLs in MongoDB!
 
-## 🔐 Security
+## Environment Variables
 
-- ✅ JWT authentication
-- ✅ Password hashing
-- ✅ Protected routes
-- ✅ Role-based access
-- ✅ Input validation
-- ✅ Error handling
+### Backend `.env` File
 
----
+```env
+# Database
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/90plusstore
 
-## 💻 Technology Stack
+# Authentication
+JWT_SECRET=your_secret_key_min_32_characters_recommended
+JWT_EXPIRY=7d
 
-| Layer      | Technology                 |
-| ---------- | -------------------------- |
-| Frontend   | React 18 + Vite + Tailwind |
-| Backend    | Node.js + Express.js       |
-| Database   | MongoDB Atlas (Free)       |
-| Deployment | Vercel + Render (Free)     |
+# Server
+PORT=5000
+NODE_ENV=development
 
----
+# Cache (optional)
+REDIS_URL=redis://localhost:6379
 
-## 🚀 Deploy for Free
+# Email (future use)
+MAIL_SERVICE=gmail
+MAIL_EMAIL=your-email@gmail.com
+MAIL_PASS=your-app-password
+```
 
-All services have **free tiers** that work perfectly:
+### Frontend `.env` File
 
-- **Frontend**: Vercel or Netlify (free)
-- **Backend**: Render (free)
-- **Database**: MongoDB Atlas (free - 5GB)
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for step-by-step instructions.
+## Troubleshooting
 
----
+### MongoDB Connection Errors
 
-## ⚡ Quick Commands
+**Error**: `MongoNetworkError`
 
-### Development
+**Solutions**:
+
+- Check your MongoDB URI in `.env`
+- Verify IP whitelist includes your current IP
+- Ensure database user has correct password
+- Check network connectivity
+
+### CORS Errors
+
+**Error**: `Access to XMLHttpRequest at 'http://localhost:5000/api...' from origin 'http://localhost:5173' has been blocked by CORS policy`
+
+**Solutions**:
+
+- Verify backend is running on port 5000
+- Check `VITE_API_URL` in frontend `.env` matches backend URL
+- Restart both frontend and backend servers
+
+### Port Already in Use
+
+**Error**: `Error: listen EADDRINUSE :::5000`
+
+**Windows**:
 
 ```bash
-# Backend
-cd backend && npm run dev
-
-# Frontend
-cd frontend && npm run dev
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
 ```
 
-### Production Build
+**Mac/Linux**:
 
 ```bash
-# Backend (on Render - just push to Git)
-git push
+lsof -i :5000
+kill -9 <PID>
+```
 
-# Frontend
+### JWT Token Errors
+
+**Error**: `JsonWebTokenError: invalid signature`
+
+**Solutions**:
+
+- Ensure `JWT_SECRET` is the same in `.env` and backend code
+- Check token hasn't expired (default: 7 days)
+- Try logging out and logging back in
+
+### npm install Fails
+
+**Solutions**:
+
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Delete node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+
+# Reinstall
+npm install
+```
+
+### ImageKit URLs Not Loading
+
+**Solutions**:
+
+- Verify ImageKit URLs are correct format: `https://ik.imagekit.io/your-key/...`
+- Check images are uploaded to ImageKit
+- Verify URL endpoints in CORS settings
+
+### Build Errors
+
+**Frontend build fails**:
+
+```bash
+# Clear Vite cache
+rm -rf frontend/.vite
+
+# Rebuild
 cd frontend && npm run build
 ```
 
-### Test API
+**Backend issues**:
 
 ```bash
-curl http://localhost:5000/api/products
+# Check Node version
+node --version  # Should be v14+
+
+# Verify all dependencies installed
+npm ls
 ```
 
----
+## Development Tips
 
-## 🎯 Next Steps
+### Useful Backend Commands
 
-### Right Now (5 minutes)
+```bash
+# Start with auto-reload (requires nodemon)
+npm run dev
 
-1. Follow the 3-step setup above
-2. Test the application
-3. Explore the features
+# Run migrations
+npm run migrate
 
-### Today (1 hour)
+# Clear cache
+npm run clear-cache
+```
 
-1. Read [QUICK_START.md](./QUICK_START.md)
-2. Create test accounts
-3. Add test products
-4. Test checkout flow
+### Frontend Development
 
-### This Week (2-3 hours)
+```bash
+# Development server with hot reload
+npm run dev
 
-1. Read [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
-2. Create accounts on Vercel, Render, MongoDB Atlas
-3. Deploy to production
-4. Test live deployment
+# Build for production
+npm run build
 
-### This Month
+# Preview production build
+npm run preview
 
-1. Customize for your needs
-2. Add your products
-3. Launch publicly
-4. Monitor and improve
+# Lint and format
+npm run lint
+npm run format
+```
 
----
+### Database Management
 
-## ❓ FAQ
+**View Collections**:
 
-### Q: Do I need to pay for anything?
+1. Open MongoDB Atlas
+2. Click **Browse Collections**
+3. View/edit documents directly
 
-**A:** No! Free tier services cover everything you need:
+**Export Data**:
 
-- Vercel/Netlify for frontend
-- Render for backend
-- MongoDB Atlas for database
-- GitHub for code
+1. Click **Data Export** in the left menu
+2. Select collections to export
+3. Download as JSON
 
-### Q: How long to get running?
+## Next Steps
 
-**A:** 5-10 minutes to run locally, 30-45 minutes to deploy.
+- **Explore the [Live Demo](https://nine0plusstore.onrender.com)**
+- **Read [API Documentation](./API_DOCUMENTATION.md)**
+- **Check [Deployment Guide](./DEPLOYMENT_GUIDE.md)** for production setup
+- **Review [Contributing Guide](./README.md#contributing)**
 
-### Q: Can I customize it?
+## Getting Help
 
-**A:** Yes! The code is clean and well-organized for easy customization.
-
-### Q: Is it production-ready?
-
-**A:** Absolutely! Follows best practices and can handle real users.
-
-### Q: What if I have issues?
-
-**A:** Check the troubleshooting section in README.md or QUICK_START.md.
-
----
-
-## 🆘 Troubleshooting Quick Links
-
-- **Port already in use**: See [QUICK_START.md](./QUICK_START.md#troubleshooting)
-- **MongoDB won't connect**: See [README.md](./README.md#troubleshooting)
-- **CORS errors**: Check `.env` files
-- **Deployment issues**: See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md#troubleshooting)
-
----
-
-## 📞 Need Help?
-
-1. **Check documentation**: Start with [INDEX.md](./INDEX.md)
-2. **Search README**: Use Ctrl+F to find your issue
-3. **Check console**: Browser F12 for frontend, terminal for backend
-4. **Review logs**: Look at npm output for errors
-
----
-
-## 🎓 What You'll Learn
-
-- MERN stack development
-- RESTful API design
-- JWT authentication
-- MongoDB database design
-- React hooks & Context API
-- Tailwind CSS
-- Responsive web design
-- Deployment strategies
-- Security best practices
-
----
-
-## ✨ Highlights
-
-- ✅ **Complete**: Everything included
-- ✅ **Modern**: Latest tech stack
-- ✅ **Scalable**: Easy to extend
-- ✅ **Documented**: Comprehensive guides
-- ✅ **Free**: No cost to deploy
-- ✅ **Professional**: Production-ready code
-- ✅ **Learning**: Great educational resource
-
----
-
-## 🎁 What's Included
-
-✅ Full backend API (15+ endpoints)
-✅ Full frontend application (8+ pages)
-✅ Database schemas & configuration
-✅ User authentication system
-✅ Admin dashboard
-✅ Shopping cart system
-✅ Checkout system
-✅ Order management
-✅ Responsive design
-✅ Comprehensive documentation
-✅ Deployment guides
-✅ Security best practices
-✅ Error handling
-✅ Input validation
-✅ Environment templates
-
----
-
-## 🚀 Ready to Begin?
-
-### Option 1: Quick Start (Recommended)
-
-👉 Open [QUICK_START.md](./QUICK_START.md) and follow the 3 steps
-
-### Option 2: Full Documentation
-
-👉 Open [README.md](./README.md) for complete information
-
-### Option 3: Jump to Deployment
-
-👉 Open [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) to go live
-
-### Option 4: Navigation Help
-
-👉 Open [INDEX.md](./INDEX.md) to find what you need
-
----
-
-## 💡 Pro Tips
-
-1. **Use two terminals**: One for backend, one for frontend
-2. **Test locally first**: Before deploying to production
-3. **Create test data**: Test with products and orders
-4. **Check browser console**: For frontend errors (F12)
-5. **Monitor logs**: Watch terminal output for errors
-6. **Use demo accounts**: To test as admin and user
-7. **Read the docs**: Everything is documented!
-
----
-
-## 📊 Statistics
-
-| Item          | Count        |
-| ------------- | ------------ |
-| Files Created | 70+          |
-| Lines of Code | 4,000+       |
-| API Endpoints | 15+          |
-| Pages         | 8+           |
-| Components    | 4            |
-| Documentation | 2,500+ lines |
-
----
-
-## 🏆 You're All Set!
-
-Everything is ready. Pick one of the options above and get started.
-
-**Happy coding! 🚀**
-
----
-
-## 📖 Quick Links
-
-| Document                                       | Purpose                | Read Time |
-| ---------------------------------------------- | ---------------------- | --------- |
-| [QUICK_START.md](./QUICK_START.md)             | Get running in minutes | 5 min     |
-| [README.md](./README.md)                       | Full documentation     | 15 min    |
-| [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)   | Deploy to production   | 20 min    |
-| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | API reference          | 15 min    |
-| [INDEX.md](./INDEX.md)                         | Find what you need     | 5 min     |
-| [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Understand structure   | 10 min    |
-
----
-
-**Start with [QUICK_START.md](./QUICK_START.md) → Deploy with [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) → Integrate with [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
-
-**Welcome aboard! 🎉**
+- 📖 **Documentation**: Check [README.md](./README.md)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Apurba-0001/90PlusStore/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/Apurba-0001/90PlusStore/discussions)
+- 📧 **Email**: [90plusstore0@gmail.com](mailto:90plusstore0@gmail.com)

@@ -10,7 +10,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-darkgreen.svg)](https://www.mongodb.com/cloud/atlas)
 [![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)](#)
 
-[Live Demo](https://nine0plusstore.onrender.com) • [Documentation](#api-endpoints) • [Issues](https://github.com/Apurba-0001/90PlusStore/issues) • [Support](#support)
+[Live Demo](https://nine0plusstore.onrender.com) • [Documentation](#-documentation) • [Issues](https://github.com/Apurba-0001/90PlusStore/issues) • [Support](#-support)
 
 </div>
 
@@ -20,10 +20,8 @@
 
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
 - [Prerequisites](#-prerequisites)
 - [Quick Start](#-quick-start)
-- [API Endpoints](#-api-endpoints)
 - [Deployment](#-deployment)
 - [Environment Setup](#-environment-variables)
 - [Documentation](#-documentation)
@@ -34,46 +32,21 @@
 
 ---
 
-## ✨ Features
+## ✨ What Makes This Special
 
-## Features
+**Complete Platform:** Full e-commerce solution from product browsing to order tracking  
+**Production-Ready:** JWT auth, RBAC, input validation, secure deployments  
+**Optimized:** Redis caching, CDN images, lazy loading, paginated queries  
+**Modular & Extensible:** Clean architecture makes it easy to add features
 
-### User Features
+### Core Features
 
-- ✅ User authentication (Register/Login)
-- ✅ JWT-based session management
-- ✅ Product browsing with category filters
-- ✅ Search and filtering functionality
-- ✅ Shopping cart management (add, remove, update quantity, clear)
-- ✅ Wishlist functionality (save favorites, toggle items)
-- ✅ Product reviews and ratings
-- ✅ Checkout and order placement
-- ✅ Multiple address support (shipping & billing)
-- ✅ Order tracking and history
-- ✅ User profile management
-- ✅ Responsive design (Mobile, Tablet, Desktop)
-- ✅ Loading skeletons for better UX
-
-### Admin Features
-
-- ✅ Admin dashboard with analytics
-- ✅ Product management (Create, Read, Update, Delete)
-- ✅ Featured products management
-- ✅ Stock management with size variants
-- ✅ Product reviews management (edit, delete reviews)
-- ✅ Order management and status updates
-- ✅ User management (view, remove users)
-- ✅ Role-based access control
-- ✅ Make user admin functionality
-
-### Product Features
-
-- ✅ Multiple product images (stored as ImgKit URLs in MongoDB)
-- ✅ Size variants (XS-XXL for clothing, shoe sizes 6-14)
-- ✅ Gender categories (Men, Women, Kids, All)
-- ✅ Product ratings and reviews system
-- ✅ Featured products showcase
-- ✅ Stock tracking per size
+- 🛒 Complete shopping workflow (search, filters, cart, checkout)
+- 👤 User authentication & secure multi-address checkout
+- ⭐ Product reviews, ratings, wishlist system
+- 📊 Admin dashboard with product & order management
+- 📱 Mobile-first responsive design
+- 🖼️ CDN-optimized images via ImageKit
 
 ### Product Categories
 
@@ -108,7 +81,7 @@
 
 ### Storage & Services
 
-- **Image Storage**: ImgKit (for product images and user avatars)
+- **Image Storage**: ImageKit (for product images and user avatars)
 - **Database**: MongoDB Atlas
 - **Cache**: Redis (optional)
 
@@ -117,523 +90,82 @@
 - Frontend: Render
 - Backend: Render
 - Database: MongoDB Atlas (free tier)
-- Image Storage: ImgKit
+- Image Storage: ImageKit
 - Cache: Redis
-
-## 📁 Project Structure
-
-```
-90plusstore/
-├── backend/
-│   ├── models/
-│   │   ├── User.js          (User schema with address, avatar, phone)
-│   │   ├── Product.js       (Product schema with ImgKit image URLs, reviews, ratings, sizes)
-│   │   ├── Order.js         (Order schema with shipping/billing address)
-│   │   └── Settings.js      (App settings)
-│   ├── routes/
-│   │   ├── authRoutes.js    (Auth, Cart, Wishlist endpoints)
-│   │   ├── productRoutes.js (Products, Reviews, Featured)
-│   │   ├── orderRoutes.js   (Order management)
-│   │   └── settingsRoutes.js
-│   ├── controllers/
-│   │   ├── authController.js    (Auth, Cart, Wishlist logic)
-│   │   ├── productController.js (Product & Review logic)
-│   │   ├── orderController.js   (Order logic)
-│   │   └── settingsController.js
-│   ├── middleware/
-│   │   ├── auth.js              (JWT verification, admin check)
-│   │   └── cache.js             (Redis caching middleware)
-│   ├── migrations/              (Database migrations)
-│   ├── config/
-│   │   └── redis.js             (Redis configuration)
-│   ├── server.js
-│   ├── package.json
-│   └── .env
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── Footer.jsx
-│   │   │   ├── ProductCard.jsx
-│   │   │   ├── ProductSkeleton.jsx       (Loading state)
-│   │   │   ├── ProductDetailSkeleton.jsx (Loading state)
-│   │   │   ├── ProtectedRoute.jsx
-│   │   │   ├── StarRating.jsx            (Rating component)
-│   │   │   └── ScrollToTop.jsx
-│   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Products.jsx      (With filters & search)
-│   │   │   ├── ProductDetail.jsx (With reviews & ratings)
-│   │   │   ├── Cart.jsx
-│   │   │   ├── Checkout.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── Profile.jsx
-│   │   │   ├── Wishlist.jsx
-│   │   │   ├── Orders.jsx        (Order history)
-│   │   │   ├── About.jsx
-│   │   │   ├── Contact.jsx
-│   │   │   ├── Shipping.jsx
-│   │   │   ├── Returns.jsx
-│   │   │   └── admin/
-│   │   │       ├── AdminDashboard.jsx  (Analytics & overview)
-│   │   │       ├── AdminProducts.jsx   (Product list & management)
-│   │   │       ├── AdminProductForm.jsx (Add/Edit products)
-│   │   │       ├── AdminOrders.jsx     (Order management)
-│   │   │       ├── AdminUsers.jsx      (User management)
-│   │   │       ├── AdminFeatured.jsx   (Featured products)
-│   │   │       ├── UserCard.jsx
-│   │   │       └── UserDetails.jsx
-│   │   ├── context/
-│   │   │   ├── AuthContext.jsx     (User auth state)
-│   │   │   ├── CartContext.jsx     (Cart state)
-│   │   │   └── WishlistContext.jsx (Wishlist state)
-│   │   ├── services/
-│   │   │   ├── api.js              (Axios instance with interceptors)
-│   │   │   └── services.js         (API service methods)
-│   │   ├── styles/
-│   │   │   └── index.css
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── package.json
-│   └── .env
-│
-└── README.md
-```
-
-## 📋 Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-- MongoDB Atlas account (free)
-- Git
 
 ## 🚀 Quick Start
 
-### Installation
+**Need:** Node.js (v14+), MongoDB Atlas (free), Git
 
 ```bash
-# 1. Clone the repository
+# Clone and setup
 git clone https://github.com/Apurba-0001/90PlusStore.git
-cd 90plusstore
+cd 90PlusStore
 
-# 2. Backend Setup
-cd backend
-npm install
-cp .env.example .env
-# Update .env with your MongoDB URI and JWT secret
-npm run dev
+# Backend (Terminal 1)
+cd backend && npm install && npm start
 
-# 3. Frontend Setup (in a new terminal)
-cd frontend
-npm install
-cp .env.example .env
-npm run dev
+# Frontend (Terminal 2)
+cd frontend && npm install && npm run dev
 ```
 
-**Backend:** http://localhost:5000  
-**Frontend:** http://localhost:3000
+👉 **[See GETTING_STARTED.md for:](#-documentation)**
 
-### Demo Accounts
-
-| Role  | Email                   | Password   |
-| ----- | ----------------------- | ---------- |
-| Admin | `admin@90plusstore.com` | `admin123` |
-| User  | `user@90plusstore.com`  | `user123`  |
+- Demo credentials
+- MongoDB Atlas setup
+- ImageKit configuration
+- Environment variables
+- Troubleshooting
 
 ---
-
-## 1. Clone the Repository
-
-```bash
-git clone https://github.com/Apurba-0001/90plusstore.git
-cd 90plusstore
-```
-
-### 2. Backend Setup
-
-```bash
-cd backend
-
-# Install dependencies
-npm install
-
-# Create .env file (copy from .env.example)
-cp .env.example .env
-
-# Update .env with your credentials:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/90plusstore
-# JWT_SECRET=your_super_secret_key
-
-# Start the development server
-npm run dev
-```
-
-The backend will run on `http://localhost:5000`
-
-### 3. Frontend Setup
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Create .env file (copy from .env.example)
-cp .env.example .env
-
-# Start the development server
-npm run dev
-```
-
-The frontend will run on `http://localhost:3000`
-
-## 📡 API Endpoints
-
-### Authentication
-
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/profile` - Get user profile (protected)
-- `PUT /api/auth/profile` - Update user profile (protected)
-- `GET /api/auth/users` - Get all users (admin only)
-- `DELETE /api/auth/users/:id` - Remove user (admin only)
-
-### Cart Management
-
-- `GET /api/auth/cart` - Get user's cart (protected)
-- `POST /api/auth/cart` - Add item to cart (protected)
-- `PATCH /api/auth/cart/:productId` - Update cart item quantity (protected)
-- `DELETE /api/auth/cart/:productId` - Remove item from cart (protected)
-- `DELETE /api/auth/cart` - Clear entire cart (protected)
-
-### Wishlist Management
-
-- `GET /api/auth/wishlist` - Get user's wishlist (protected)
-- `PATCH /api/auth/wishlist/:productId` - Toggle product in wishlist (protected)
-
-### Products
-
-- `GET /api/products` - Get all products (with pagination and filtering)
-- `GET /api/products/:id` - Get product by ID
-- `GET /api/products/categories` - Get all categories
-- `GET /api/products/featured` - Get featured products
-- `POST /api/products` - Create product (admin only)
-- `PUT /api/products/:id` - Update product (admin only)
-- `PUT /api/products/:id/featured` - Toggle featured status (admin only)
-- `DELETE /api/products/:id` - Delete product (admin only)
-
-### Reviews & Ratings
-
-- `GET /api/products/:id/reviews` - Get product reviews
-- `POST /api/products/:id/reviews` - Add review (protected)
-- `PUT /api/products/:id/reviews/:reviewId` - Update review (admin only)
-- `DELETE /api/products/:id/reviews/:reviewId` - Delete review (admin only)
-
-### Orders
-
-- `POST /api/orders` - Create order (protected)
-- `GET /api/orders/my-orders` - Get user's orders (protected)
-- `GET /api/orders/:id` - Get order details (protected)
-- `PUT /api/orders/:id/status` - Update order status (admin only)
-- `GET /api/orders` - Get all orders (admin only)
-
----
-
-## Demo Credentials
-
-### Admin Account
-
-- Email: `admin@90plusstore.com`
-- Password: `admin123`
-
-### Regular User
-
-- Email: `user@90plusstore.com`
-- Password: `user123`
-
-## MongoDB Atlas Setup
-
-1. Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a free account
-3. Create a new cluster (free tier)
-4. Create a database user with username and password
-5. Add your IP to the whitelist
-6. Get the connection string and update `.env`
-
-Example connection string:
-
-```
-mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrites=true&w=majority
-```
-
-## ImgKit Setup
-
-Images are managed through ImgKit for fast CDN delivery and optimization:
-
-1. Visit [ImgKit](https://imagekit.io/)
-2. Create a free account and project
-3. Upload product images to your ImgKit project dashboard
-4. Copy the generated ImgKit URLs
-5. Store these URLs in MongoDB Product documents in the `images` array
-
-**Image Storage Architecture**:
-
-- Product images are uploaded to ImgKit via their dashboard
-- ImgKit generates permanent URLs for each image
-- These URLs are stored in MongoDB Product model (`images` field)
-- Frontend displays images directly from ImgKit CDN URLs
-- No backend code integration needed - just URL storage
-
-**Example Product Image Structure in MongoDB**:
-
-```javascript
-images: [
-  {
-    url: "https://ik.imagekit.io/your-id/products/jersey-1.jpg",
-    alt: "Jersey Front View",
-  },
-  {
-    url: "https://ik.imagekit.io/your-id/products/jersey-2.jpg",
-    alt: "Jersey Back View",
-  },
-];
-```
 
 ## 🌐 Deployment
 
-### Deploy Backend on Render
+**Both frontend and backend deploy on [Render](https://render.com) - Quick setup, free tier available**
 
-1. Push your code to GitHub
-2. Visit [Render Dashboard](https://dashboard.render.com)
-3. Create a new Web Service
-4. Connect your GitHub repository
-5. Configure settings:
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-   - **Root Directory**: `backend`
-6. Add environment variables:
-   - `MONGODB_URI`
-   - `JWT_SECRET`
-   - `NODE_ENV=production`
-7. Deploy
+👉 **[See DEPLOYMENT_GUIDE.md for:](#-documentation)**
 
-Backend URL will be: `https://your-backend-name.onrender.com`
-
-### Deploy Frontend on Render
-
-1. Push your code to GitHub
-2. Visit [Render Dashboard](https://dashboard.render.com)
-3. Create a new Static Site
-4. Connect your GitHub repository
-5. Configure settings:
-   - **Build Command**: `npm run build`
-   - **Publish Directory**: `frontend/dist`
-   - **Root Directory**: `frontend`
-6. Add environment variable:
-   - `VITE_API_URL=https://your-backend-name.onrender.com/api`
-7. Deploy
-
-Frontend URL will be: `https://your-frontend-name.onrender.com`
-
-### Deployment Architecture
-
-```
-GitHub Repository
-    ↓
-├── Backend Service (Render Web Service)
-│   └── https://your-backend-name.onrender.com
-│
-└── Frontend Service (Render Static Site)
-    └── https://your-frontend-name.onrender.com
-
-Both connect to:
-├── MongoDB Atlas (Database)
-├── ImgKit (Image Storage & CDN)
-└── Redis (Optional Caching)
-```
-
-## Building for Production
-
-### Backend
-
-```bash
-cd backend
-npm start  # Runs on PORT specified in .env
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm run build  # Creates optimized build in dist/
-npm run preview  # Preview the build
-```
-
-## ⚙️ Environment Variables
-
-### Backend (.env)
-
-```
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/90plusstore
-JWT_SECRET=your_super_secret_jwt_key
-PORT=5000
-NODE_ENV=production
-REDIS_URL=redis://default:password@localhost:6379 (optional)
-```
-
-### Frontend (.env)
-
-```
-VITE_API_URL=https://your-backend-url.com/api
-```
+- Step-by-step deployment instructions
+- Environment variables configuration
+- Security checklist
+- Performance optimization
+- Custom domain setup
 
 ---
 
 ## 📚 Documentation
 
-### Getting Started
+| Document                                       | Purpose                                                    |
+| ---------------------------------------------- | ---------------------------------------------------------- |
+| [GETTING_STARTED.md](./GETTING_STARTED.md)     | Setup, credentials, environment variables, troubleshooting |
+| [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)   | Production deployment, security checklist, performance     |
+| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | Complete API reference and endpoints                       |
+| [TECHNOLOGIES_USED.md](./TECHNOLOGIES_USED.md) | Detailed tech stack with versions                          |
+| [DEPLOY_FREE.md](./DEPLOY_FREE.md)             | Free hosting options and alternatives                      |
 
-- **[Setup Guide](./GETTING_STARTED.md)** - Step-by-step setup instructions
-- **[Installation](#-quick-start)** - Quick installation guide
-- **[API Documentation](./API_DOCUMENTATION.md)** - Detailed API reference
+## 🔐 Security
 
-### Development Guides
+✅ JWT authentication (7-day expiration)  
+✅ bcryptjs password hashing (10 rounds)  
+✅ Role-based access control (RBAC)  
+✅ Environment variable protection  
+✅ Input validation (client & server)  
+✅ CORS configuration
 
-- **[Frontend Development](./frontend/README.md)** - Frontend setup and guide
-- **[Backend Development](./backend/README.md)** - Backend setup and guide
-- **[Project Structure](#-project-structure)** - Understand the codebase
+👉 **[Full security checklist in DEPLOYMENT_GUIDE.md](#-documentation)**
 
-### Deployment & DevOps
+## ⚡ Performance
 
-- **[Deployment Guide](./DEPLOYMENT_GUIDE.md)** - Full deployment instructions
-- **[Deploy for Free](./DEPLOY_FREE.md)** - Free hosting alternatives
-- **[Technologies Used](./TECHNOLOGIES_USED.md)** - Tech stack details
+✅ Redis caching for products & featured items  
+✅ Pagination for large datasets  
+✅ Indexed MongoDB queries  
+✅ Vite fast build, React Router lazy loading  
+✅ CDN-optimized images (ImageKit)  
+✅ Production-optimized builds
 
-### Learning Resources
+👉 **[Detailed optimization guide in DEPLOYMENT_GUIDE.md](#-documentation)**
 
-- **[MERN Stack Documentation](https://www.mongodb.com/docs/manual/)** - MongoDB docs
-- **[React.js Guide](https://react.dev/)** - React official documentation
-- **[Express.js Documentation](https://expressjs.com/)** - Express.js guide
-- **[JWT Authentication](https://jwt.io/)** - JWT tokens explained
-
-### FAQ
-
-**Q: How do I add a new product category?**
-
-- Edit the `category` enum in [backend/models/Product.js](./backend/models/Product.js)
-
-**Q: How do I add product images?**
-
-- Upload images to ImgKit via their dashboard
-- Copy the ImgKit URL for each image
-- Add URLs to the `images` array in the product document in MongoDB
-
-**Q: How do I change the JWT expiration time?**
-
-- Modify the token expiry in [backend/controllers/authController.js](./backend/controllers/authController.js)
-
-**Q: How do I enable Redis caching?**
-
-- Set `REDIS_URL` in your .env and restart the backend server
-
-**Q: How do I deploy to production?**
-
-- See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed steps
-
-**Q: Do I need to pay for ImgKit?**
-
-- ImgKit offers a free tier with 20GB monthly bandwidth, perfect for small to medium projects
-
-## 🔐 Security Considerations
-
-1. **JWT Authentication**: Secure token-based authentication with configurable expiration
-2. **JWT Secret**: Change the default JWT secret in production
-3. **Password Hashing**: Passwords hashed using bcryptjs (10 rounds)
-4. **CORS**: Backend includes CORS configuration for secure API access
-5. **Protected Routes**: Both frontend and backend route protection
-6. **Admin Middleware**: Role-based access control for admin endpoints
-7. **Environment Variables**: Keep sensitive data in .env files (not in Git)
-8. **Input Validation**: All inputs validated on both client and server
-9. **Address Storage**: Secure address data storage with multiple address support
-10. **Token Refresh**: JWT tokens expire after 7 days
-
-## ⚡ Performance Optimization
-
-- **Frontend**:
-  - Vite for fast build times and development
-  - React Router lazy loading
-  - Loading skeletons for better perceived performance
-  - Context API for efficient state management
-- **Backend**:
-  - Redis caching for products, categories, and featured items
-  - Pagination for large datasets
-  - Indexed MongoDB queries
-  - HTTP compression
-  - Keep-alive ping endpoint for deployment services
-
-- **General**:
-  - Image optimization via URLs
-  - CSS minification with Tailwind
-  - Production build optimization
-  - Lazy image loading in product cards
-
-## 🛠️ Troubleshooting
-
-### MongoDB Connection Error
-
-- Check if your IP is whitelisted in MongoDB Atlas
-- Verify connection string in .env
-- Ensure database user has correct permissions
-
-### CORS Errors
-
-- Verify backend CORS configuration
-- Check if frontend API URL matches backend URL
-
-### Port Already in Use
-
-```bash
-# Linux/Mac
-lsof -i :5000  # Find process on port 5000
-kill -9 <PID>
-
-# Windows
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
-```
-
-### JWT Token Expired
-
-- Token expires after 7 days
-- Users need to login again for new token
-
-## 🧪 Testing Endpoints with cURL
-
-```bash
-# Register
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John","email":"john@example.com","password":"pass123"}'
-
-# Login
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"john@example.com","password":"pass123"}'
-
-# Get Products
-curl http://localhost:5000/api/products
-
-# Get Categories
-curl http://localhost:5000/api/products/categories
-```
-
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Here's how you can help:
 
