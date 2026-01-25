@@ -1,147 +1,148 @@
-# 90PlusStore - MERN Stack E-Commerce Application
+# 🛒 90PlusStore
 
-A production-ready, full-stack e-commerce application for football merchandise built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
+<div align="center">
 
-## Features
+## Professional Full-Stack E-Commerce Platform
 
-### User Features
+**A production-ready, enterprise-grade e-commerce platform specializing in football merchandise, built with the modern MERN stack.**
 
-- ✅ User authentication (Register/Login)
-- ✅ JWT-based session management
-- ✅ Product browsing with category filters
-- ✅ Search functionality
-- ✅ Shopping cart management
-- ✅ Checkout and order placement
-- ✅ Order tracking
-- ✅ User profile management
-- ✅ Responsive design (Mobile, Tablet, Desktop)
+_Designed for scalability, security, and optimal user experience across all devices._
 
-### Admin Features
+</div>
 
-- ✅ Admin dashboard with analytics
-- ✅ Product management (Create, Read, Update, Delete)
-- ✅ Stock management
-- ✅ Order management and status updates
-- ✅ Order tracking
-- ✅ Role-based access control
+---
 
-### Product Categories
+<div align="center">
 
-- Jerseys
-- Boots
-- Shirts
-- Shorts
-- Special Collectibles
+### 🚀 Technology Stack
 
-## Tech Stack
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![EmailJS](https://img.shields.io/badge/EmailJS-7B68EE?style=for-the-badge&logo=gmail&logoColor=white)
 
-### Frontend
+</div>
 
-- React 18
-- Vite
-- React Router v6
-- Axios
-- Tailwind CSS
-- Context API for state management
+---
 
-### Backend
+---
 
-- Node.js
-- Express.js
-- MongoDB (Atlas)
-- Mongoose
-- JWT for authentication
-- bcryptjs for password hashing
+## ✨ Key Features
 
-### Deployment
+### 👥 Customer Features
 
-- Frontend: Vercel or Netlify
-- Backend: Render
-- Database: MongoDB Atlas (free tier)
+- 🔐 **Authentication & Security** - Secure user registration and JWT-based authentication
+- 🔍 **Product Discovery** - Advanced browsing with category filters, search functionality, and product recommendations
+- 🛍️ **Shopping Experience** - Intuitive shopping cart, checkout process, and order management
+- 📦 **Order Management** - Real-time order tracking and comprehensive order history
+- 👤 **Account Management** - User profile management with order and wishlist functionality
+- 📱 **Responsive Design** - Fully optimized for mobile, tablet, and desktop devices
 
-## Project Structure
+### ⚙️ Administrative Features
 
-```
+- 📊 **Dashboard Analytics** - Comprehensive performance metrics and business intelligence
+- 📦 **Product Management** - Complete CRUD operations with inventory management
+- 📋 **Order Administration** - Order processing, tracking, and status management
+- 👥 **User Management** - Administrative user oversight and role-based access control
+- ⭐ **Content Management** - Featured products and inventory optimization
+
+---
+
+## 📚 Technology Stack
+
+### 🎨 Frontend Architecture
+
+|                                                      Technology                                                      | Purpose                                  |
+| :------------------------------------------------------------------------------------------------------------------: | :--------------------------------------- |
+|            ![React](https://img.shields.io/badge/React%2018-61DAFB?logo=react&logoColor=black&style=flat)            | Component-based UI framework             |
+|                ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white&style=flat)                | Lightning-fast build tool and dev server |
+| ![React Router](https://img.shields.io/badge/React%20Router%20v6-CA4245?logo=reactrouter&logoColor=white&style=flat) | Client-side routing and navigation       |
+|   ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?logo=tailwindcss&logoColor=white&style=flat)    | Utility-first CSS framework              |
+|              ![Axios](https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white&style=flat)               | HTTP client for API communication        |
+|            ![EmailJS](https://img.shields.io/badge/EmailJS-3D3D3D?logo=gmail&logoColor=white&style=flat)             | Email notification service               |
+
+### 🔧 Backend Architecture
+
+|                                              Technology                                               | Purpose                        |
+| :---------------------------------------------------------------------------------------------------: | :----------------------------- |
+|   ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white&style=flat)   | JavaScript runtime environment |
+| ![Express.js](https://img.shields.io/badge/Express.js-000000?logo=express&logoColor=white&style=flat) | RESTful API framework          |
+|    ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=flat)    | NoSQL database                 |
+|    ![Mongoose](https://img.shields.io/badge/Mongoose-800?logo=mongoose&logoColor=white&style=flat)    | Object data modeling (ODM)     |
+|     ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white&style=flat)     | Secure authentication          |
+|       ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white&style=flat)       | In-memory caching layer        |
+
+### 🚀 Deployment Infrastructure
+
+|                                                   Platform                                                    | Purpose              |
+| :-----------------------------------------------------------------------------------------------------------: | :------------------- |
+|         ![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=flat)          | Frontend Deployment  |
+|        ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?logo=netlify&logoColor=white&style=flat)        | Frontend Alternative |
+|         ![Render](https://img.shields.io/badge/Render-46E3B7?logo=render&logoColor=white&style=flat)          | Backend Deployment   |
+| ![MongoDB Atlas](https://img.shields.io/badge/MongoDB%20Atlas-47A248?logo=mongodb&logoColor=white&style=flat) | Database Hosting     |
+
+---
+
+## Project Architecture
+
+### Directory Structure
+
+````
 90plusstore/
-├── backend/
-│   ├── models/
-│   │   ├── User.js
-│   │   ├── Product.js
-│   │   └── Order.js
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── productRoutes.js
-│   │   └── orderRoutes.js
-│   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── productController.js
-│   │   └── orderController.js
-│   ├── middleware/
-│   │   └── auth.js
-│   ├── server.js
-│   ├── package.json
-│   ├── .env.example
-│   └── .env
 │
-├── frontend/
+├── backend/                        # Node.js/Express API Server
+│   ├── config/                     # Configuration files
+│   ├── controllers/                # Request handlers
+│   ├── middleware/                 # Authentication & caching
+│   ├── models/                     # Database schemas
+│   ├── routes/                     # API endpoints
+│   ├── migrations/                 # Database migrations
+│   ├── server.js                   # Entry point
+│   └── package.json
+│
+├── frontend/                       # React Application
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── Footer.jsx
-│   │   │   ├── ProductCard.jsx
-│   │   │   └── ProtectedRoute.jsx
-│   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Products.jsx
-│   │   │   ├── ProductDetail.jsx
-│   │   │   ├── Cart.jsx
-│   │   │   ├── Checkout.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── Profile.jsx
-│   │   │   └── admin/
-│   │   │       ├── AdminDashboard.jsx
-│   │   │       ├── AdminProducts.jsx
-│   │   │       ├── AdminProductForm.jsx
-│   │   │       └── AdminOrders.jsx
-│   │   ├── context/
-│   │   │   ├── AuthContext.jsx
-│   │   │   └── CartContext.jsx
-│   │   ├── services/
-│   │   │   ├── api.js
-│   │   │   └── services.js
-│   │   ├── styles/
-│   │   │   └── index.css
+│   │   ├── components/             # Reusable UI components
+│   │   ├── context/                # State management
+│   │   ├── pages/                  # Route pages
+│   │   │   └── admin/              # Admin dashboard
+│   │   ├── services/               # API services
+│   │   ├── styles/                 # Global styles
 │   │   ├── App.jsx
 │   │   └── main.jsx
-│   ├── index.html
 │   ├── vite.config.js
 │   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── package.json
-│   ├── .env.example
-│   └── .env
+│   └── package.json
 │
-└── README.md
-```
+└── Documentation files
 
-## Prerequisites
+---
 
-- Node.js (v14 or higher)
-- npm or yarn
-- MongoDB Atlas account (free)
-- Git
+## 📋 System Requirements
 
-## Local Setup
+| Requirement | Version |
+| :--- | :--- |
+| 🟢 **Node.js** | v18 - v20 |
+| 📦 **npm** or **yarn** | Latest version |
+| 🗄️ **MongoDB Atlas** | Free tier account |
+| 📂 **Git** | Latest version |
 
-### 1. Clone the Repository
+---
+
+## 🎯 Getting Started
+
+### 1️⃣ Repository Setup
 
 ```bash
 git clone https://github.com/yourusername/90plusstore.git
 cd 90plusstore
-```
+````
 
-### 2. Backend Setup
+### 2️⃣ Backend Configuration
 
 ```bash
 cd backend
@@ -149,20 +150,21 @@ cd backend
 # Install dependencies
 npm install
 
-# Create .env file (copy from .env.example)
+# Configure environment variables
 cp .env.example .env
 
 # Update .env with your credentials:
 # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/90plusstore
 # JWT_SECRET=your_super_secret_key
+# NODE_ENV=development
 
-# Start the development server
+# Start development server
 npm run dev
 ```
 
-The backend will run on `http://localhost:5000`
+**Backend runs on**: `http://localhost:5000`
 
-### 3. Frontend Setup
+### 3️⃣ Frontend Configuration
 
 ```bash
 cd frontend
@@ -170,241 +172,341 @@ cd frontend
 # Install dependencies
 npm install
 
-# Create .env file (copy from .env.example)
+# Configure environment variables
 cp .env.example .env
 
-# Start the development server
+# Update .env:
+# VITE_API_URL=http://localhost:5000/api
+
+# Start development server
 npm run dev
 ```
 
-The frontend will run on `http://localhost:3000`
+**Frontend runs on**: `http://localhost:3000`
 
-## API Endpoints
+---
 
-### Authentication
+## 🔌 API Reference
 
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/profile` - Get user profile (protected)
-- `PUT /api/auth/profile` - Update user profile (protected)
+### 🔐 Authentication Endpoints
 
-### Products
+| Method | Endpoint             | Description             | Auth Required |
+| ------ | -------------------- | ----------------------- | ------------- |
+| POST   | `/api/auth/register` | Create new user account | No            |
+| POST   | `/api/auth/login`    | Authenticate user       | No            |
+| GET    | `/api/auth/profile`  | Retrieve user profile   | Yes           |
+| PUT    | `/api/auth/profile`  | Update user profile     | Yes           |
 
-- `GET /api/products` - Get all products (with pagination and filtering)
-- `GET /api/products/:id` - Get product by ID
-- `GET /api/products/categories` - Get all categories
-- `POST /api/products` - Create product (admin only)
-- `PUT /api/products/:id` - Update product (admin only)
-- `DELETE /api/products/:id` - Delete product (admin only)
+### 📦 Product Endpoints
 
-### Orders
+| Method | Endpoint                   | Description                  | Auth Required |
+| ------ | -------------------------- | ---------------------------- | ------------- |
+| GET    | `/api/products`            | Get all products (paginated) | No            |
+| GET    | `/api/products/:id`        | Get product details          | No            |
+| GET    | `/api/products/categories` | Get product categories       | No            |
+| POST   | `/api/products`            | Create new product           | Yes (Admin)   |
+| PUT    | `/api/products/:id`        | Update product               | Yes (Admin)   |
+| DELETE | `/api/products/:id`        | Delete product               | Yes (Admin)   |
 
-- `POST /api/orders` - Create order (protected)
-- `GET /api/orders/my-orders` - Get user's orders (protected)
-- `GET /api/orders/:id` - Get order by ID (protected)
-- `PUT /api/orders/:id/status` - Update order status (admin only)
-- `GET /api/orders/admin/all-orders` - Get all orders (admin only)
+### 📋 Order Endpoints
 
-## Demo Credentials
+| Method | Endpoint                       | Description         | Auth Required |
+| ------ | ------------------------------ | ------------------- | ------------- |
+| POST   | `/api/orders`                  | Create new order    | Yes           |
+| GET    | `/api/orders/my-orders`        | Get user orders     | Yes           |
+| GET    | `/api/orders/:id`              | Get order details   | Yes           |
+| PUT    | `/api/orders/:id/status`       | Update order status | Yes (Admin)   |
+| GET    | `/api/orders/admin/all-orders` | Get all orders      | Yes (Admin)   |
 
-### Admin Account
+---
 
-- Email: `admin@90plusstore.com`
-- Password: `admin123`
+## 🔑 Demo Credentials
 
-### Regular User
+### 🛡️ Administrator Account
 
-- Email: `user@90plusstore.com`
-- Password: `user123`
+```
+Email:    admin@90plusstore.com
+Password: admin123
+```
 
-## MongoDB Atlas Setup
+### 👤 Standard User Account
 
-1. Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a free account
-3. Create a new cluster (free tier)
-4. Create a database user with username and password
-5. Add your IP to the whitelist
-6. Get the connection string and update `.env`
+```
+Email:    user@90plusstore.com
+Password: user123
+```
 
-Example connection string:
+---
+
+## 🗄️ MongoDB Atlas Configuration
+
+To set up your database:
+
+1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a new free tier cluster
+3. Configure database user (username & password)
+4. Whitelist your IP address
+5. Obtain connection string
+6. Add to backend `.env`:
 
 ```
 mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrites=true&w=majority
 ```
 
+---
+
 ## Deployment Guide
 
-### Deploy Backend on Render
+### Deploy Backend to Render
 
-1. Push your code to GitHub
-2. Visit [Render Dashboard](https://dashboard.render.com)
-3. Create a new Web Service
-4. Connect your GitHub repository
-5. Configure settings:
+1. Push code to GitHub
+2. Access [Render Dashboard](https://dashboard.render.com)
+3. Create new Web Service
+4. Connect GitHub repository
+5. Configure deployment:
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
-6. Add environment variables:
-   - `MONGODB_URI`
-   - `JWT_SECRET`
-   - `NODE_ENV=production`
+6. Set environment variables:
+   - `MONGODB_URI`: Your MongoDB connection string
+   - `JWT_SECRET`: Secure secret key
+   - `NODE_ENV`: `production`
 7. Deploy
 
-Backend URL will be: `https://your-app-name.onrender.com`
+**Backend URL**: `https://your-app-name.onrender.com`
 
-### Deploy Frontend on Vercel
+### Deploy Frontend to Vercel
 
-1. Visit [Vercel Dashboard](https://vercel.com/dashboard)
+1. Access [Vercel Dashboard](https://vercel.com/dashboard)
 2. Click "New Project"
-3. Import your GitHub repository
-4. Configure:
+3. Import GitHub repository
+4. Configure settings:
    - **Framework**: Vite
    - **Root Directory**: `frontend`
 5. Add environment variable:
-   - `VITE_API_URL=https://your-backend-url.com/api`
+   - `VITE_API_URL`: `https://your-backend-url.onrender.com/api`
 6. Deploy
 
-Frontend URL will be: `https://your-app-name.vercel.app`
+**Frontend URL**: `https://your-app-name.vercel.app`
 
-### Alternative: Deploy Frontend on Netlify
+### Alternative: Deploy Frontend to Netlify
 
 1. Visit [Netlify](https://netlify.com)
-2. Click "New site from Git"
+2. Select "New site from Git"
 3. Connect GitHub repository
-4. Configure:
+4. Configure settings:
    - **Base Directory**: `frontend`
    - **Build Command**: `npm run build`
    - **Publish Directory**: `dist`
 5. Add environment variable:
-   - `VITE_API_URL=https://your-backend-url.com/api`
+   - `VITE_API_URL`: `https://your-backend-url.onrender.com/api`
 6. Deploy
 
-## Building for Production
+---
 
-### Backend
+## 📦 Building for Production
+
+### 🔧 Backend Production Build
 
 ```bash
 cd backend
-npm start  # Runs on PORT specified in .env
+npm start  # Runs server on PORT specified in .env
 ```
 
-### Frontend
+### 🎨 Frontend Production Build
 
 ```bash
 cd frontend
-npm run build  # Creates optimized build in dist/
-npm run preview  # Preview the build
+npm run build  # Creates optimized production build in dist/
+npm run preview  # Preview production build locally
 ```
 
-## Environment Variables
+---
 
-### Backend (.env)
+## ⚙️ Environment Configuration
 
-```
+### 🔐 Backend Environment Variables (`.env`)
+
+```env
 MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/90plusstore
-JWT_SECRET=your_super_secret_jwt_key
+JWT_SECRET=your_super_secret_jwt_key_change_in_production
 PORT=5000
 NODE_ENV=production
 ```
 
-### Frontend (.env)
+### 🎨 Frontend Environment Variables (`.env`)
 
+```env
+VITE_API_URL=https://your-backend-url.onrender.com/api
 ```
-VITE_API_URL=https://your-backend-url.com/api
-```
 
-## Security Considerations
+---
 
-1. **JWT Secret**: Change the default JWT secret in production
-2. **CORS**: Backend includes CORS configuration for secure API access
-3. **Password Hashing**: Passwords are hashed using bcryptjs
-4. **Environment Variables**: Keep sensitive data in .env files (not in Git)
-5. **Validation**: All inputs are validated on both client and server
-6. **Role-Based Access**: Admin routes are protected with role verification
+## 🔒 Security Best Practices
 
-## Performance Optimization
+| Practice                  | Description                                      |
+| ------------------------- | ------------------------------------------------ |
+| **JWT Secret Management** | Use strong, unique secret in production          |
+| **CORS Configuration**    | Backend includes proper CORS setup               |
+| **Password Encryption**   | bcryptjs hashing for all passwords               |
+| **Environment Variables** | Store sensitive data in .env (never commit)      |
+| **Input Validation**      | All inputs validated client-side and server-side |
+| **Role-Based Access**     | Admin routes protected with role verification    |
+| **HTTPS Only**            | Use secure connections in production             |
 
-- **Frontend**: Vite for fast build times and development
-- **Caching**: Browser caching headers configured
-- **Pagination**: Products and orders are paginated
-- **Lazy Loading**: Images lazy-loaded in product cards
-- **Minification**: Production builds are minified
+---
 
-## Troubleshooting
+## ⚡ Performance Optimization
 
-### MongoDB Connection Error
+- **Frontend Build**: Vite provides optimized, fast builds
+- **Code Splitting**: Lazy-loaded components and routes
+- **Image Optimization**: Lazy loading in product cards
+- **API Pagination**: Products and orders use pagination
+- **Caching Strategy**: Browser caching headers configured
+- **Minification**: Production builds automatically minified
 
-- Check if your IP is whitelisted in MongoDB Atlas
-- Verify connection string in .env
-- Ensure database user has correct permissions
+---
+
+## 🐛 Troubleshooting
+
+### MongoDB Connection Issues
+
+**Problem**: Cannot connect to MongoDB
+
+- Verify IP whitelist in MongoDB Atlas
+- Check connection string in `.env`
+- Ensure database user has appropriate permissions
 
 ### CORS Errors
 
+**Problem**: Frontend cannot reach backend API
+
 - Verify backend CORS configuration
-- Check if frontend API URL matches backend URL
+- Confirm frontend API URL matches backend URL
+- Check browser console for specific error messages
 
 ### Port Already in Use
 
-```bash
-# Linux/Mac
-lsof -i :5000  # Find process on port 5000
-kill -9 <PID>
+**Windows**:
 
-# Windows
+```bash
 netstat -ano | findstr :5000
 taskkill /PID <PID> /F
 ```
 
-### JWT Token Expired
-
-- Token expires after 7 days
-- Users need to login again for new token
-
-## Testing Endpoints with cURL
+**Linux/Mac**:
 
 ```bash
-# Register
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John","email":"john@example.com","password":"pass123"}'
-
-# Login
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"john@example.com","password":"pass123"}'
-
-# Get Products
-curl http://localhost:5000/api/products
-
-# Get Categories
-curl http://localhost:5000/api/products/categories
+lsof -i :5000
+kill -9 <PID>
 ```
 
-## Contributing
+### JWT Token Expiration
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**Problem**: "Token expired" error
 
-## License
-
-This project is licensed under the MIT License - see LICENSE file for details.
-
-## Support
-
-For support, email 90plusstore0@gmail.com or open an issue on GitHub.
-
-## Future Enhancements
-
-- [ ] Payment gateway integration (Stripe, PayPal)
-- [ ] Email notifications
-- [ ] Sales analytics
-- [ ] Multi-language support
-- [ ] Dark mode
-- [ ] Two-factor authentication
-- [ ] Social media integration
+- Tokens expire after 7 days
+- Users must login again to refresh token
+- Implement token refresh logic for better UX
 
 ---
 
-**Made with ❤️ by Apurba Maji**
+## 🧪 API Testing with cURL
+
+### User Registration
+
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name":"John Doe",
+    "email":"john@example.com",
+    "password":"securepass123"
+  }'
+```
+
+### User Login
+
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"john@example.com",
+    "password":"securepass123"
+  }'
+```
+
+### Get Products
+
+```bash
+curl http://localhost:5000/api/products
+```
+
+### Get Product Categories
+
+```bash
+curl http://localhost:5000/api/products/categories
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! To contribute:
+
+1. **Fork** the repository
+2. **Create** a feature branch:
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. **Commit** your changes:
+   ```bash
+   git commit -m 'Add AmazingFeature'
+   ```
+4. **Push** to the branch:
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. **Open** a Pull Request
+
+---
+
+## 🗺️ Roadmap
+
+Future enhancements planned for this platform:
+
+- [ ] Payment gateway integration (Stripe, PayPal)
+- [ ] Email notification system
+- [ ] Advanced sales analytics and reporting
+- [ ] Multi-language support (i18n)
+- [ ] Dark mode interface
+- [ ] Two-factor authentication (2FA)
+- [ ] Social media login integration
+- [ ] Customer reviews and ratings
+- [ ] Inventory alerts and notifications
+- [ ] Advanced search with filters
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for detailed information.
+
+---
+
+## 📞 Support
+
+For technical support or inquiries:
+
+- **Email**: 90plusstore0@gmail.com
+- **Issues**: Open an issue on GitHub
+- **Documentation**: See [API_DOCUMENTATION.md](API_DOCUMENTATION.md), [GETTING_STARTED.md](GETTING_STARTED.md), and [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+---
+
+## 👨‍💻 Author
+
+**Apurba Maji** - Full Stack Developer
+
+---
+
+_Last Updated: January 2026_
