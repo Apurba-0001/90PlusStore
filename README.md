@@ -244,7 +244,7 @@ npm run dev
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/90plusstore.git
+git clone https://github.com/Apurba-0001/90plusstore.git
 cd 90plusstore
 ```
 
