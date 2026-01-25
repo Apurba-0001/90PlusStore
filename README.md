@@ -68,7 +68,7 @@
 
 ### Product Features
 
-- ✅ Multiple product images
+- ✅ Multiple product images (stored as ImgKit URLs in MongoDB)
 - ✅ Size variants (XS-XXL for clothing, shoe sizes 6-14)
 - ✅ Gender categories (Men, Women, Kids, All)
 - ✅ Product ratings and reviews system
@@ -106,11 +106,18 @@
 - Redis for caching (optional)
 - CORS for secure API access
 
+### Storage & Services
+
+- **Image Storage**: ImgKit (for product images and user avatars)
+- **Database**: MongoDB Atlas
+- **Cache**: Redis (optional)
+
 ### Deployment
 
 - Frontend: Render
 - Backend: Render
 - Database: MongoDB Atlas (free tier)
+- Image Storage: ImgKit
 - Cache: Redis
 
 ## 📁 Project Structure
@@ -120,7 +127,7 @@
 ├── backend/
 │   ├── models/
 │   │   ├── User.js          (User schema with address, avatar, phone)
-│   │   ├── Product.js       (Product schema with reviews, ratings, sizes)
+│   │   ├── Product.js       (Product schema with ImgKit image URLs, reviews, ratings, sizes)
 │   │   ├── Order.js         (Order schema with shipping/billing address)
 │   │   └── Settings.js      (App settings)
 │   ├── routes/
@@ -365,6 +372,39 @@ Example connection string:
 mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/90plusstore?retryWrites=true&w=majority
 ```
 
+## ImgKit Setup
+
+Images are managed through ImgKit for fast CDN delivery and optimization:
+
+1. Visit [ImgKit](https://imagekit.io/)
+2. Create a free account and project
+3. Upload product images to your ImgKit project dashboard
+4. Copy the generated ImgKit URLs
+5. Store these URLs in MongoDB Product documents in the `images` array
+
+**Image Storage Architecture**:
+
+- Product images are uploaded to ImgKit via their dashboard
+- ImgKit generates permanent URLs for each image
+- These URLs are stored in MongoDB Product model (`images` field)
+- Frontend displays images directly from ImgKit CDN URLs
+- No backend code integration needed - just URL storage
+
+**Example Product Image Structure in MongoDB**:
+
+```javascript
+images: [
+  {
+    url: "https://ik.imagekit.io/your-id/products/jersey-1.jpg",
+    alt: "Jersey Front View",
+  },
+  {
+    url: "https://ik.imagekit.io/your-id/products/jersey-2.jpg",
+    alt: "Jersey Back View",
+  },
+];
+```
+
 ## 🌐 Deployment
 
 ### Deploy Backend on Render
@@ -414,6 +454,7 @@ GitHub Repository
 
 Both connect to:
 ├── MongoDB Atlas (Database)
+├── ImgKit (Image Storage & CDN)
 └── Redis (Optional Caching)
 ```
 
@@ -487,6 +528,12 @@ VITE_API_URL=https://your-backend-url.com/api
 
 - Edit the `category` enum in [backend/models/Product.js](./backend/models/Product.js)
 
+**Q: How do I add product images?**
+
+- Upload images to ImgKit via their dashboard
+- Copy the ImgKit URL for each image
+- Add URLs to the `images` array in the product document in MongoDB
+
 **Q: How do I change the JWT expiration time?**
 
 - Modify the token expiry in [backend/controllers/authController.js](./backend/controllers/authController.js)
@@ -498,6 +545,10 @@ VITE_API_URL=https://your-backend-url.com/api
 **Q: How do I deploy to production?**
 
 - See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed steps
+
+**Q: Do I need to pay for ImgKit?**
+
+- ImgKit offers a free tier with 20GB monthly bandwidth, perfect for small to medium projects
 
 ## 🔐 Security Considerations
 
