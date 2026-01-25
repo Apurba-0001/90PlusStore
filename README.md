@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏟️ 90PlusStore
+# ⚽ 90PlusStore
 
 #### A Production-Ready MERN Stack E-Commerce Application for Football Merchandise
 
