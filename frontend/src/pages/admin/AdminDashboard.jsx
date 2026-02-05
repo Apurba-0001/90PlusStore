@@ -432,7 +432,7 @@ export default function AdminDashboard() {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-gray-900">
+          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 break-words">
             ₹{stats.totalRevenue.toFixed(2)}
           </p>
           <p className="text-xs text-gray-500 mt-2">This month</p>

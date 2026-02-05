@@ -11,13 +11,13 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
-    searchParams.get("category") || ""
+    searchParams.get("category") || "",
   );
   const [selectedGender, setSelectedGender] = useState(
-    searchParams.get("gender") || ""
+    searchParams.get("gender") || "",
   );
   const [selectedType, setSelectedType] = useState(
-    searchParams.get("type") || ""
+    searchParams.get("type") || "",
   );
   const [selectedSize, setSelectedSize] = useState("");
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -27,7 +27,7 @@ export default function Products() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1024
+    typeof window !== "undefined" ? window.innerWidth : 1024,
   );
 
   // Responsive products per page: 20 for mobile, 30 for desktop
@@ -83,7 +83,7 @@ export default function Products() {
           selectedCategory || undefined,
           page,
           search || undefined,
-          productsPerPage // Responsive: 20 for mobile, 30 for desktop
+          productsPerPage, // Responsive: 20 for mobile, 30 for desktop
         );
 
         let filteredProducts = response.data.products;
@@ -103,7 +103,7 @@ export default function Products() {
                   !product.gender ||
                   product.gender.toLowerCase() ===
                     selectedGender.toLowerCase() ||
-                  product.gender.toLowerCase() === "all"
+                  product.gender.toLowerCase() === "all",
               );
             } else if (selectedGender === "") {
               // All selected: show all
@@ -115,7 +115,7 @@ export default function Products() {
             filteredProducts = filteredProducts.filter(
               (product) =>
                 !product.availableSizes ||
-                product.availableSizes.includes(selectedSize)
+                product.availableSizes.includes(selectedSize),
             );
           }
         }
@@ -433,36 +433,77 @@ export default function Products() {
 
               {/* Pagination - Only show if more than 1 page */}
               {totalPages > 1 && (
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
-                  >
-                    Previous
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`px-4 py-2.5 border-2 rounded-xl text-sm sm:text-base font-medium transition-all ${
-                          page === p
-                            ? "bg-blue-600 text-white border-blue-600"
-                            : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    )
-                  )}
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
-                  >
-                    Next
-                  </button>
+                <div className="flex flex-col md:flex-row items-center justify-center gap-2 mt-8">
+                  {/* Mobile: Simplified pagination (Previous/Next only) */}
+                  <div className="flex md:hidden gap-2 w-full">
+                    <button
+                      onClick={() => {
+                        setPage(Math.max(1, page - 1));
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={page === 1}
+                      className="flex-1 px-3 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all"
+                    >
+                      ← Previous
+                    </button>
+                    <div className="flex items-center px-3 py-2.5 bg-gray-50 rounded-xl border-2 border-gray-200">
+                      <span className="text-sm font-medium text-gray-700">
+                        {page} / {totalPages}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setPage(Math.min(totalPages, page + 1));
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={page === totalPages}
+                      className="flex-1 px-3 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all"
+                    >
+                      Next →
+                    </button>
+                  </div>
+
+                  {/* Desktop: Full pagination with all page numbers */}
+                  <div className="hidden md:flex gap-2 flex-wrap justify-center">
+                    <button
+                      onClick={() => {
+                        setPage(Math.max(1, page - 1));
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={page === 1}
+                      className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (p) => (
+                        <button
+                          key={p}
+                          onClick={() => {
+                            setPage(p);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className={`px-4 py-2.5 border-2 rounded-xl text-sm sm:text-base font-medium transition-all ${
+                            page === p
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ),
+                    )}
+                    <button
+                      onClick={() => {
+                        setPage(Math.min(totalPages, page + 1));
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={page === totalPages}
+                      className="px-4 py-2.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium transition-all"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
               )}
             </>
