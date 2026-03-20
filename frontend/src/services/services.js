@@ -34,9 +34,9 @@ export const authService = {
 };
 
 export const productService = {
-  getProducts: (category, page, search, limit = 10) =>
+  getProducts: (category, page, search, limit = 10, gender, size) =>
     apiClient.get("/products", {
-      params: { category, page, search, limit },
+      params: { category, page, search, limit, gender, size },
     }),
 
   getFeaturedProducts: () => apiClient.get("/products/featured"),

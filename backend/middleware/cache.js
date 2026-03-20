@@ -38,7 +38,9 @@ const generateCacheKey = (req) => {
       category: query.category || null,
       search: query.search || null,
       gender: query.gender || null,
+      size: query.size || null,
       page: query.page || 1,
+      limit: query.limit || 10,
     });
     return `products:all:${Buffer.from(serializedQuery).toString("base64")}`;
   }

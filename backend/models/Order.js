@@ -51,11 +51,13 @@ const orderSchema = new mongoose.Schema(
       zipCode: String,
     },
     paymentDetails: {
-      cardHolderName: String,
-      cardNumber: String,
-      expiryDate: String,
-      cvv: String,
-      upiId: String,
+      // SECURITY: DO NOT store complete card details
+      // Only store payment method reference and last 4 digits
+      paymentMethodId: String, // Reference from payment gateway
+      last4Digits: String, // Last 4 digits of card (if applicable)
+      cardBrand: String, // Visa, MasterCard, etc.
+      upiIdMasked: String, // Masked UPI ID for admin visibility
+      // Never store: cardNumber, expiryDate, cvv, ibanDetails
     },
     status: {
       type: String,
@@ -79,7 +81,7 @@ const orderSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Order", orderSchema);

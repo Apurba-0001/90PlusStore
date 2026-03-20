@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { productService } from "../../services/services";
 
@@ -10,38 +10,52 @@ export default function AdminProducts() {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [total, setTotal] = useState(0);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 30;
 
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const fetchProducts = useCallback(
+    async (targetPage = page) => {
       setLoading(true);
       try {
         const response = await productService.getProducts(
           null,
-          page,
+          targetPage,
           null,
-          ITEMS_PER_PAGE
+          ITEMS_PER_PAGE,
         );
-        setProducts(response.data.products);
-        setTotalPages(response.data.pagination.pages);
-        setTotal(response.data.pagination.total);
+
+        const pagination = response.data?.pagination || {};
+        const pages = Math.max(pagination.pages || 1, 1);
+        const currentPage = Math.min(targetPage, pages);
+
+        if (currentPage !== targetPage) {
+          setPage(currentPage);
+          return;
+        }
+
+        setProducts(response.data?.products || []);
+        setTotalPages(pages);
+        setTotal(pagination.total || 0);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [page],
+  );
 
-    fetchProducts();
-  }, [page]);
+  useEffect(() => {
+    fetchProducts(page);
+  }, [page, fetchProducts]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await productService.deleteProduct(id);
-        setProducts(products.filter((p) => p._id !== id));
+        await fetchProducts(page);
       } catch (err) {
-        alert("Error deleting product: " + err.message);
+        const message = err.response?.data?.message || err.message;
+        alert("Error deleting product: " + message);
       }
     }
   };
@@ -54,8 +68,8 @@ export default function AdminProducts() {
         products.map((p) =>
           p._id === id
             ? { ...p, isFeatured: response.data.product.isFeatured }
-            : p
-        )
+            : p,
+        ),
       );
       alert(response.data.message);
     } catch (err) {

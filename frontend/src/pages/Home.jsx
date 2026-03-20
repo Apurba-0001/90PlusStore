@@ -19,7 +19,6 @@ import { productService } from "../services/services";
 import ProductCard from "../components/ProductCard";
 import ProductSkeleton from "../components/ProductSkeleton";
 
-
 export default function Home() {
   const { user } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -206,7 +205,7 @@ export default function Home() {
             }}
           />
         </div>
-        <style jsx global>{`
+        <style>{`
           @keyframes glow-move5 {
             0% {
               transform: translateY(0) scale(1);
@@ -324,7 +323,7 @@ export default function Home() {
           }
         `}</style>
         {/* Add these keyframes to your CSS (e.g., index.css or global styles) */}
-        <style jsx global>{`
+        <style>{`
           @keyframes glow-move1 {
             0% {
               transform: translateY(0) scale(1);
@@ -398,7 +397,6 @@ export default function Home() {
               transform: textHover ? "scale(1.045)" : "scale(1)",
               transition: "transform 0.38s cubic-bezier(.22,1,.36,1)",
             }}
-           
             onMouseEnter={() => setTextHover(true)}
             onMouseLeave={() => setTextHover(false)}
           >
@@ -418,7 +416,7 @@ export default function Home() {
             >
               {heroLine}
             </span>
-            <style jsx global>{`
+            <style>{`
               @keyframes gradient-move {
                 0% {
                   background-position: 0% 0%;
@@ -496,12 +494,11 @@ export default function Home() {
           </div>
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <ProductSkeleton key={i} />
-             ))}
+              {Array.from({ length: 8 }).map((_, i) => (
+                <ProductSkeleton key={i} />
+              ))}
             </div>
           ) : error ? (
-
             <div className="bg-white rounded-2xl shadow-md border border-red-100 p-8 text-center">
               <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg

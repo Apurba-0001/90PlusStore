@@ -61,7 +61,7 @@ export default function AdminProductForm() {
         : ["XS", "S", "M", "L", "XL", "XXL"];
 
     const hasInvalidSizes = formData.availableSizes.some(
-      (size) => !validSizesForCategory.includes(size)
+      (size) => !validSizesForCategory.includes(size),
     );
 
     if (hasInvalidSizes) {
@@ -124,6 +124,8 @@ export default function AdminProductForm() {
       navigate("/admin/products");
     } catch (err) {
       console.error("Error details:", err);
+      console.error("Response data:", err.response?.data);
+      console.error("Response status:", err.response?.status);
       const errorMsg =
         err.response?.data?.message || err.message || "Unknown error";
       alert("Error saving product: " + errorMsg);
@@ -268,7 +270,7 @@ export default function AdminProductForm() {
                     setFormData((prev) => ({
                       ...prev,
                       availableSizes: prev.availableSizes.filter(
-                        (s) => s !== size
+                        (s) => s !== size,
                       ),
                     }));
                   } else {

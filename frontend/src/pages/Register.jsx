@@ -16,6 +16,25 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const getPasswordValidationMessage = (password) => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    if (!/[@$!%*?&]/.test(password)) {
+      return "Password must contain at least one special character (@$!%*?&)";
+    }
+    return "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -27,6 +46,14 @@ export default function Register() {
 
     if (formData.password !== formData.confirmPassword) {
       setValidationError("Passwords do not match");
+      return;
+    }
+
+    const passwordValidationMessage = getPasswordValidationMessage(
+      formData.password,
+    );
+    if (passwordValidationMessage) {
+      setValidationError(passwordValidationMessage);
       return;
     }
 
@@ -107,6 +134,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  minLength={8}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition bg-gray-50 hover:bg-white pr-12"
                   placeholder="••••••••"
                 />
@@ -152,6 +180,10 @@ export default function Register() {
                   )}
                 </button>
               </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Use at least 8 characters with uppercase, lowercase, number, and
+                special character.
+              </p>
             </div>
 
             <div>

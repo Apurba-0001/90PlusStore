@@ -129,10 +129,10 @@ export default function Checkout() {
         setTaxRateInternational(settings.taxRateInternational ?? 0);
         setShippingRates(settings.shippingRates);
         setIndiaFreeShippingThreshold(
-          settings.indiaFreeShippingThreshold || 2000
+          settings.indiaFreeShippingThreshold || 2000,
         );
         setInternationalFreeShippingThreshold(
-          settings.internationalFreeShippingThreshold || 5000
+          settings.internationalFreeShippingThreshold || 5000,
         );
       } catch (err) {
         console.error("Error loading settings:", err);
@@ -155,22 +155,22 @@ export default function Checkout() {
     window.addEventListener("taxRateIndiaUpdated", handleTaxRateIndiaUpdate);
     window.addEventListener(
       "taxRateInternationalUpdated",
-      handleTaxRateInternationalUpdate
+      handleTaxRateInternationalUpdate,
     );
     window.addEventListener("shippingRatesUpdated", handleShippingRatesUpdate);
 
     return () => {
       window.removeEventListener(
         "taxRateIndiaUpdated",
-        handleTaxRateIndiaUpdate
+        handleTaxRateIndiaUpdate,
       );
       window.removeEventListener(
         "taxRateInternationalUpdated",
-        handleTaxRateInternationalUpdate
+        handleTaxRateInternationalUpdate,
       );
       window.removeEventListener(
         "shippingRatesUpdated",
-        handleShippingRatesUpdate
+        handleShippingRatesUpdate,
       );
     };
   }, []);
@@ -273,8 +273,47 @@ export default function Checkout() {
     navigate(path);
   };
 
+  const isValidNameLikeField = (value) => /^[a-zA-Z\s.'-]{2,60}$/.test(value);
+  const isValidZipCode = (value) => /^[a-zA-Z0-9\s-]{3,12}$/.test(value);
+  const isValidStreet = (value) =>
+    typeof value === "string" && value.trim().length >= 3;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "mobile") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 15);
+      setFormData((prev) => ({ ...prev, mobile: digitsOnly }));
+      return;
+    }
+
+    if (name === "zipCode" || name === "billingZipCode") {
+      const zipSanitized = value.replace(/[^a-zA-Z0-9\s-]/g, "").slice(0, 12);
+      setFormData((prev) => ({ ...prev, [name]: zipSanitized }));
+      return;
+    }
+
+    if (name === "cardNumber") {
+      const cardDigits = value.replace(/\D/g, "").slice(0, 19);
+      setFormData((prev) => ({ ...prev, cardNumber: cardDigits }));
+      return;
+    }
+
+    if (name === "cvv") {
+      const cvvDigits = value.replace(/\D/g, "").slice(0, 4);
+      setFormData((prev) => ({ ...prev, cvv: cvvDigits }));
+      return;
+    }
+
+    if (name === "countryCode") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 4);
+      setFormData((prev) => ({
+        ...prev,
+        countryCode: digitsOnly ? `+${digitsOnly}` : "+",
+      }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -284,6 +323,87 @@ export default function Checkout() {
     setError(null);
 
     try {
+      // Validate shipping address details
+      if (!isValidStreet(formData.street)) {
+        setError("Please enter a valid street address");
+        setLoading(false);
+        return;
+      }
+
+      if (!isValidNameLikeField(formData.city)) {
+        setError("Please enter a valid city name");
+        setLoading(false);
+        return;
+      }
+
+      if (!isValidNameLikeField(formData.state)) {
+        setError("Please enter a valid state name");
+        setLoading(false);
+        return;
+      }
+
+      if (!isValidNameLikeField(formData.country)) {
+        setError("Please enter a valid country name");
+        setLoading(false);
+        return;
+      }
+
+      if (!isValidZipCode(formData.zipCode)) {
+        setError("Please enter a valid zip code");
+        setLoading(false);
+        return;
+      }
+
+      // Validate billing details when custom values are provided
+      if (formData.billingStreet && !isValidStreet(formData.billingStreet)) {
+        setError("Please enter a valid billing street address");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.billingCity && !isValidNameLikeField(formData.billingCity)) {
+        setError("Please enter a valid billing city name");
+        setLoading(false);
+        return;
+      }
+
+      if (
+        formData.billingState &&
+        !isValidNameLikeField(formData.billingState)
+      ) {
+        setError("Please enter a valid billing state name");
+        setLoading(false);
+        return;
+      }
+
+      if (
+        formData.billingCountry &&
+        !isValidNameLikeField(formData.billingCountry)
+      ) {
+        setError("Please enter a valid billing country name");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.billingZipCode && !isValidZipCode(formData.billingZipCode)) {
+        setError("Please enter a valid billing zip code");
+        setLoading(false);
+        return;
+      }
+
+      // Validate contact number details
+      if (!/^\+[0-9]{1,4}$/.test(formData.countryCode)) {
+        setError("Please enter a valid country code (e.g., +91)");
+        setLoading(false);
+        return;
+      }
+
+      if (!/^[0-9]{6,15}$/.test(formData.mobile)) {
+        setError("Please enter a valid mobile number (6-15 digits)");
+        setLoading(false);
+        return;
+      }
+
       // Validate UPI ID for UPI payments
       if (formData.paymentMethod === "upi") {
         if (!formData.upiId) {
@@ -363,10 +483,11 @@ export default function Checkout() {
           upiId: formData.upiId,
         },
         paymentMethod: formData.paymentMethod,
+        paymentMethodId: `manual_${formData.paymentMethod}_${Date.now()}`,
       };
 
       await orderService.createOrder(orderData);
-      clearCart();
+      await clearCart();
       setShowSuccessModal(true);
     } catch (err) {
       const message = err.response?.data?.message || err.message;
@@ -591,6 +712,8 @@ export default function Checkout() {
                       value={formData.zipCode}
                       onChange={handleChange}
                       required
+                      pattern="[a-zA-Z0-9\s-]{3,12}"
+                      maxLength={12}
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm sm:text-base transition-all"
                     />
                   </div>
@@ -608,6 +731,7 @@ export default function Checkout() {
                       onChange={handleChange}
                       required
                       pattern="^\+[0-9]{1,4}$"
+                      maxLength={5}
                       placeholder="+91"
                       list="countryCodes"
                       className="w-28 px-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm sm:text-base transition-all"
@@ -636,6 +760,8 @@ export default function Checkout() {
                       onChange={handleChange}
                       required
                       pattern="[0-9]{6,15}"
+                      maxLength={15}
+                      inputMode="numeric"
                       placeholder="Mobile number"
                       className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm sm:text-base transition-all"
                     />
@@ -743,6 +869,7 @@ export default function Checkout() {
                         onChange={handleChange}
                         placeholder="5104 2200 5104 2200"
                         maxLength="19"
+                        inputMode="numeric"
                         required
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-600"
                       />
@@ -782,6 +909,7 @@ export default function Checkout() {
                           onChange={handleChange}
                           placeholder="456"
                           maxLength="4"
+                          inputMode="numeric"
                           required
                           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-600"
                         />
@@ -871,6 +999,8 @@ export default function Checkout() {
                           value={formData.billingZipCode}
                           onChange={handleChange}
                           placeholder="700001"
+                          pattern="[a-zA-Z0-9\s-]{3,12}"
+                          maxLength={12}
                           required
                           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-600"
                         />
@@ -902,7 +1032,7 @@ export default function Checkout() {
                         name="upiId"
                         value={formData.upiId}
                         onChange={handleChange}
-                        placeholder="apurbamaji@okaxis"
+                        placeholder="90plusstore@okaxis"
                         required
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-orange-600 text-sm sm:text-base"
                       />
@@ -1089,7 +1219,7 @@ export default function Checkout() {
                               <>
                                 <span className="line-through text-gray-400">
                                   {shippingRates.internationalStandard.toFixed(
-                                    2
+                                    2,
                                   )}
                                 </span>
                                 <span className="ml-1 text-green-600 font-bold">

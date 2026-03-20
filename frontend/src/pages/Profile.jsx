@@ -29,6 +29,11 @@ export default function Profile() {
   const [popupType, setPopupType] = useState("success");
   const [showPopup, setShowPopup] = useState(false);
 
+  const isValidNameLikeField = (value) => /^[a-zA-Z\s.'-]{2,60}$/.test(value);
+  const isValidZipCode = (value) => /^[a-zA-Z0-9\s-]{3,12}$/.test(value);
+  const isValidStreet = (value) =>
+    typeof value === "string" && value.trim().length >= 3;
+
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -36,12 +41,83 @@ export default function Profile() {
 
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "phone") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 15);
+      setAddressData((prev) => ({ ...prev, phone: digitsOnly }));
+      return;
+    }
+
+    if (name === "countryCode") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 4);
+      setAddressData((prev) => ({
+        ...prev,
+        countryCode: digitsOnly ? `+${digitsOnly}` : "+",
+      }));
+      return;
+    }
+
+    if (name === "zipCode") {
+      const zipSanitized = value.replace(/[^a-zA-Z0-9\s-]/g, "").slice(0, 12);
+      setAddressData((prev) => ({ ...prev, zipCode: zipSanitized }));
+      return;
+    }
+
     setAddressData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSaveAddress = async () => {
     setIsSavingAddress(true);
     try {
+      if (!isValidStreet(addressData.street)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid street address.");
+        setShowPopup(true);
+        return;
+      }
+
+      if (!isValidNameLikeField(addressData.city)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid city name.");
+        setShowPopup(true);
+        return;
+      }
+
+      if (!isValidNameLikeField(addressData.state)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid state name.");
+        setShowPopup(true);
+        return;
+      }
+
+      if (!isValidNameLikeField(addressData.country)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid country name.");
+        setShowPopup(true);
+        return;
+      }
+
+      if (!isValidZipCode(addressData.zipCode)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid zip code.");
+        setShowPopup(true);
+        return;
+      }
+
+      if (!/^\+[0-9]{1,4}$/.test(addressData.countryCode)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid country code (e.g., +91).");
+        setShowPopup(true);
+        return;
+      }
+
+      if (!/^[0-9]{6,15}$/.test(addressData.phone)) {
+        setPopupType("error");
+        setPopupMessage("Please enter a valid mobile number (6-15 digits).");
+        setShowPopup(true);
+        return;
+      }
+
       await authService.updateProfile({
         address: { ...addressData },
         phone: addressData.phone,
@@ -55,7 +131,7 @@ export default function Profile() {
       setPopupType("error");
       setPopupMessage(
         err?.response?.data?.message ||
-          "Failed to save address. Please try again."
+          "Failed to save address. Please try again.",
       );
       setShowPopup(true);
     } finally {
@@ -72,8 +148,8 @@ export default function Profile() {
       await orderService.cancelOrder(orderId);
       setOrders((prev) =>
         prev.map((order) =>
-          order._id === orderId ? { ...order, status: "cancelled" } : order
-        )
+          order._id === orderId ? { ...order, status: "cancelled" } : order,
+        ),
       );
       setPopupType("success");
       setPopupMessage("Order cancelled successfully.");
@@ -82,7 +158,7 @@ export default function Profile() {
       setPopupType("error");
       setPopupMessage(
         err?.response?.data?.message ||
-          "Failed to cancel order. Please try again."
+          "Failed to cancel order. Please try again.",
       );
       setShowPopup(true);
     } finally {
@@ -239,6 +315,7 @@ export default function Profile() {
                     name="street"
                     value={addressData.street}
                     onChange={handleAddressChange}
+                    required
                     className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-gray-50 hover:bg-white"
                     placeholder="Enter street address"
                   />
@@ -253,6 +330,7 @@ export default function Profile() {
                       name="city"
                       value={addressData.city}
                       onChange={handleAddressChange}
+                      required
                       className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-gray-50 hover:bg-white"
                       placeholder="City"
                     />
@@ -266,6 +344,7 @@ export default function Profile() {
                       name="state"
                       value={addressData.state}
                       onChange={handleAddressChange}
+                      required
                       className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-gray-50 hover:bg-white"
                       placeholder="State"
                     />
@@ -281,6 +360,7 @@ export default function Profile() {
                       name="country"
                       value={addressData.country}
                       onChange={handleAddressChange}
+                      required
                       className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-gray-50 hover:bg-white"
                       placeholder="Country"
                     />
@@ -294,6 +374,9 @@ export default function Profile() {
                       name="zipCode"
                       value={addressData.zipCode}
                       onChange={handleAddressChange}
+                      required
+                      maxLength={12}
+                      pattern="[a-zA-Z0-9\s-]{3,12}"
                       className="w-full border rounded px-3 py-2 mt-1"
                       placeholder="Zip Code"
                     />
@@ -307,6 +390,9 @@ export default function Profile() {
                       name="countryCode"
                       value={addressData.countryCode}
                       onChange={handleAddressChange}
+                      required
+                      maxLength={5}
+                      pattern="^\+[0-9]{1,4}$"
                       className="w-24 border rounded px-3 py-2 mt-1"
                       placeholder="+91"
                       list="countryCodes"
@@ -324,9 +410,12 @@ export default function Profile() {
                       name="phone"
                       value={addressData.phone}
                       onChange={handleAddressChange}
+                      required
                       className="flex-1 border rounded px-3 py-2 mt-1"
                       placeholder="Mobile number"
                       pattern="[0-9]{6,15}"
+                      maxLength={15}
+                      inputMode="numeric"
                     />
                   </div>
                 </div>
@@ -469,7 +558,7 @@ export default function Profile() {
                         <button
                           onClick={() =>
                             setExpandedOrder((prev) =>
-                              prev === order._id ? null : order._id
+                              prev === order._id ? null : order._id,
                             )
                           }
                           className="text-blue-600 hover:text-blue-800 px-4 py-2 sm:px-2 sm:py-0 bg-blue-50 sm:bg-transparent rounded-lg sm:rounded-none w-full sm:w-auto"
@@ -520,10 +609,10 @@ export default function Profile() {
                                   order.status === "delivered"
                                     ? "bg-green-200 text-green-800"
                                     : order.status === "cancelled"
-                                    ? "bg-red-200 text-red-800"
-                                    : order.status === "shipped"
-                                    ? "bg-blue-200 text-blue-800"
-                                    : "bg-yellow-200 text-yellow-800"
+                                      ? "bg-red-200 text-red-800"
+                                      : order.status === "shipped"
+                                        ? "bg-blue-200 text-blue-800"
+                                        : "bg-yellow-200 text-yellow-800"
                                 }`}
                               >
                                 {order.status}

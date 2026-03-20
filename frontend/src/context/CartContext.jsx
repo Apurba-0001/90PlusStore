@@ -81,13 +81,13 @@ export const CartProvider = ({ children }) => {
       setCart((prevCart) => {
         const itemKey = size ? `${product._id}-${size}` : product._id;
         const existingItem = prevCart.find(
-          (item) => item.id === product._id && (!size || item.size === size)
+          (item) => item.id === product._id && (!size || item.size === size),
         );
         if (existingItem) {
           return prevCart.map((item) =>
             item.id === product._id && item.size === size
               ? { ...item, quantity: item.quantity + quantity }
-              : item
+              : item,
           );
         }
         return [
@@ -142,8 +142,8 @@ export const CartProvider = ({ children }) => {
     } else {
       setCart((prevCart) =>
         prevCart.map((item) =>
-          item.id === productId ? { ...item, quantity } : item
-        )
+          item.id === productId ? { ...item, quantity } : item,
+        ),
       );
     }
   };
@@ -156,13 +156,25 @@ export const CartProvider = ({ children }) => {
     if (user) {
       try {
         await authService.clearCart();
-        setCart([]);
       } catch (error) {
         console.error("Error clearing cart:", error);
+      } finally {
+        // Always re-sync from backend so UI matches server state.
+        await fetchCart();
       }
     } else {
       setCart([]);
     }
+  };
+
+  const syncCart = async () => {
+    if (user) {
+      await fetchCart();
+      return;
+    }
+
+    const savedCart = localStorage.getItem("cart");
+    setCart(savedCart ? JSON.parse(savedCart) : []);
   };
 
   const getTotalPrice = () => {
@@ -182,6 +194,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
+        syncCart,
         getTotalPrice,
         getTotalItems,
       }}

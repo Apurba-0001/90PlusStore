@@ -16,7 +16,7 @@ export default function AdminOrders() {
       try {
         const response = await orderService.getAllOrders(
           status || undefined,
-          page
+          page,
         );
         setOrders(response.data.orders);
         setTotalPages(response.data.pagination.pages);
@@ -36,7 +36,7 @@ export default function AdminOrders() {
       const { orderId, order } = event.detail;
       // Update the order in the list
       setOrders((prevOrders) =>
-        prevOrders.map((o) => (o._id === orderId ? order : o))
+        prevOrders.map((o) => (o._id === orderId ? order : o)),
       );
     };
 
@@ -46,7 +46,7 @@ export default function AdminOrders() {
         const { orderId, order } = JSON.parse(cancelledData);
         // Update the order in the list
         setOrders((prevOrders) =>
-          prevOrders.map((o) => (o._id === orderId ? order : o))
+          prevOrders.map((o) => (o._id === orderId ? order : o)),
         );
       }
     };
@@ -64,7 +64,7 @@ export default function AdminOrders() {
     try {
       await orderService.updateOrderStatus(orderId, newStatus);
       const updatedOrders = orders.map((o) =>
-        o._id === orderId ? { ...o, status: newStatus } : o
+        o._id === orderId ? { ...o, status: newStatus } : o,
       );
       setOrders(updatedOrders);
     } catch (err) {
@@ -117,7 +117,7 @@ export default function AdminOrders() {
                   <div
                     onClick={() =>
                       setExpandedOrder(
-                        expandedOrder === order._id ? null : order._id
+                        expandedOrder === order._id ? null : order._id,
                       )
                     }
                     className="min-w-0"
@@ -174,10 +174,10 @@ export default function AdminOrders() {
                           order.status === "delivered"
                             ? "bg-green-500 md:bg-green-200 text-white md:text-green-800"
                             : order.status === "cancelled"
-                            ? "bg-red-500 md:bg-red-200 text-white md:text-red-800"
-                            : order.status === "shipped"
-                            ? "bg-blue-500 md:bg-blue-200 text-white md:text-blue-800"
-                            : "bg-yellow-500 md:bg-yellow-200 text-white md:text-yellow-800"
+                              ? "bg-red-500 md:bg-red-200 text-white md:text-red-800"
+                              : order.status === "shipped"
+                                ? "bg-blue-500 md:bg-blue-200 text-white md:text-blue-800"
+                                : "bg-yellow-500 md:bg-yellow-200 text-white md:text-yellow-800"
                         }`}
                       >
                         <option value="pending">Pending</option>
@@ -192,7 +192,7 @@ export default function AdminOrders() {
                     <button
                       onClick={() =>
                         setExpandedOrder(
-                          expandedOrder === order._id ? null : order._id
+                          expandedOrder === order._id ? null : order._id,
                         )
                       }
                       className="text-gray-600 hover:text-blue-600 transition p-2 rounded-md hover:bg-gray-100"
@@ -251,7 +251,7 @@ export default function AdminOrders() {
                                       ? item.productObjectId.substring(0, 8)
                                       : item.productObjectId._id?.substring(
                                           0,
-                                          8
+                                          8,
                                         )}
                                   </span>
                                 </p>
@@ -359,54 +359,58 @@ export default function AdminOrders() {
                           </span>
                         </p>
 
+                        {order.paymentDetails?.paymentMethodId && (
+                          <p className="text-sm mb-3 break-all">
+                            <span className="font-semibold">
+                              Payment Reference:
+                            </span>{" "}
+                            <span className="font-mono text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">
+                              {order.paymentDetails.paymentMethodId}
+                            </span>
+                          </p>
+                        )}
+
                         {/* Card Details (Credit/Debit) */}
                         {(order.paymentMethod === "credit-card" ||
                           order.paymentMethod === "debit-card") &&
-                          order.paymentDetails?.cardHolderName && (
+                          (order.paymentDetails?.last4Digits ||
+                            order.paymentDetails?.cardBrand) && (
                             <div className="bg-white p-3 rounded border border-blue-200">
-                              <p className="text-sm mb-2">
-                                <span className="font-semibold">
-                                  Card Holder Name:
-                                </span>{" "}
-                                {order.paymentDetails.cardHolderName}
-                              </p>
                               <p className="text-sm mb-2">
                                 <span className="font-semibold">
                                   Card Number:
                                 </span>{" "}
-                                {order.paymentDetails.cardNumber?.slice(-4)
-                                  ? `****-****-****-${order.paymentDetails.cardNumber.slice(
-                                      -4
-                                    )}`
+                                {order.paymentDetails.last4Digits
+                                  ? `****-****-****-${order.paymentDetails.last4Digits}`
                                   : "Not available"}
                               </p>
-                              <p className="text-sm mb-2">
-                                <span className="font-semibold">
-                                  Expiry Date:
-                                </span>{" "}
-                                {order.paymentDetails.expiryDate ||
-                                  "Not available"}
-                              </p>
-                              <p className="text-sm text-red-600">
-                                <span className="font-semibold">CVV:</span> ***
-                              </p>
+                              {order.paymentDetails.cardBrand && (
+                                <p className="text-sm mb-2">
+                                  <span className="font-semibold">
+                                    Card Brand:
+                                  </span>{" "}
+                                  {order.paymentDetails.cardBrand}
+                                </p>
+                              )}
                             </div>
                           )}
 
                         {/* UPI Details */}
                         {(order.paymentMethod === "upi" ||
                           order.paymentMethod === "upi-id") &&
-                          order.paymentDetails?.upiId && (
+                          order.paymentDetails?.upiIdMasked && (
                             <div className="bg-white p-3 rounded border border-purple-200">
                               <p className="text-sm">
                                 <span className="font-semibold">UPI ID:</span>{" "}
-                                {order.paymentDetails.upiId}
+                                {order.paymentDetails.upiIdMasked}
                               </p>
                             </div>
                           )}
 
-                        {!order.paymentDetails?.cardHolderName &&
-                          !order.paymentDetails?.upiId && (
+                        {!order.paymentDetails?.paymentMethodId &&
+                          !order.paymentDetails?.last4Digits &&
+                          !order.paymentDetails?.cardBrand &&
+                          !order.paymentDetails?.upiIdMasked && (
                             <p className="text-sm text-gray-500 italic">
                               No payment details available
                             </p>

@@ -76,49 +76,26 @@ export default function Products() {
   }, [searchParams]);
 
   useEffect(() => {
+    setPage(1);
+  }, [selectedCategory, selectedGender, selectedSize, search, productsPerPage]);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
+        const genderFilter = !search ? selectedGender || undefined : undefined;
+        const sizeFilter = !search ? selectedSize || undefined : undefined;
+
         const response = await productService.getProducts(
           selectedCategory || undefined,
           page,
           search || undefined,
           productsPerPage, // Responsive: 20 for mobile, 30 for desktop
+          genderFilter,
+          sizeFilter,
         );
 
-        let filteredProducts = response.data.products;
-
-        // Only apply additional filters if NOT searching
-        // When searching, show all matching results
-        if (!search) {
-          // Gender filter logic
-          if (selectedGender) {
-            if (
-              selectedGender === "Men" ||
-              selectedGender === "Women" ||
-              selectedGender === "Kids"
-            ) {
-              filteredProducts = filteredProducts.filter(
-                (product) =>
-                  !product.gender ||
-                  product.gender.toLowerCase() ===
-                    selectedGender.toLowerCase() ||
-                  product.gender.toLowerCase() === "all",
-              );
-            } else if (selectedGender === "") {
-              // All selected: show all
-            }
-          }
-
-          // Filter by size (only if product has availableSizes)
-          if (selectedSize) {
-            filteredProducts = filteredProducts.filter(
-              (product) =>
-                !product.availableSizes ||
-                product.availableSizes.includes(selectedSize),
-            );
-          }
-        }
+        let filteredProducts = response.data.products || [];
 
         // Apply sorting
         if (sortBy && sortBy !== "default") {
@@ -142,8 +119,14 @@ export default function Products() {
           });
         }
 
+        const pages = Math.max(response.data?.pagination?.pages || 1, 1);
+        if (page > pages) {
+          setPage(pages);
+          return;
+        }
+
         setProducts(filteredProducts);
-        setTotalPages(response.data.pagination.pages);
+        setTotalPages(pages);
       } catch (err) {
         console.error(err);
       } finally {
@@ -152,7 +135,15 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, [selectedCategory, search, page, selectedGender, selectedSize, sortBy]);
+  }, [
+    selectedCategory,
+    search,
+    page,
+    selectedGender,
+    selectedSize,
+    sortBy,
+    productsPerPage,
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">

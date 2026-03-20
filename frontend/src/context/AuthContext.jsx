@@ -88,8 +88,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authService.login(email, password);
-      const { token, user } = response.data;
+      const { token, csrfToken, user } = response.data;
       localStorage.setItem("token", token);
+      if (csrfToken) {
+        localStorage.setItem("csrfToken", csrfToken);
+      }
       localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
       return user;
@@ -104,13 +107,22 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authService.register(name, email, password);
-      const { token, user } = response.data;
+      const { token, csrfToken, user } = response.data;
       localStorage.setItem("token", token);
+      if (csrfToken) {
+        localStorage.setItem("csrfToken", csrfToken);
+      }
       localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
       return user;
     } catch (err) {
-      const message = err.response?.data?.message || "Registration failed";
+      const validationErrors = err.response?.data?.errors;
+      const detailedMessage =
+        Array.isArray(validationErrors) && validationErrors.length > 0
+          ? validationErrors[0].message
+          : null;
+      const message =
+        detailedMessage || err.response?.data?.message || "Registration failed";
       setError(message);
       throw err;
     }

@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Please provide a password"],
-      minlength: 6,
+      minlength: 8, // Updated from 6 to 8 for stronger passwords
       select: false,
     },
     isAdmin: {
@@ -72,7 +72,7 @@ const userSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("User", userSchema);
