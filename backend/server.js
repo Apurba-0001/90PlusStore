@@ -65,28 +65,62 @@ app.use(express.urlencoded({ limit: "10kb", extended: true })); // 10KB limit fo
 app.use(securityHeaders);
 
 // 9. Configure CORS properly
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
-  : [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "http://127.0.0.1:3000",
-      "http://127.0.0.1:5173",
-      /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:(3000|5173)$/, // Local network IPs in development
-      /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:(3000|5173)$/, // Local network 10.x IPs
-      /^http:\/\/172\.(1[6-9]|2[0-9]|3[01])\.\d{1,3}\.\d{1,3}:(3000|5173)$/, // Local network 172.x IPs
-    ];
+const normalizeOrigin = (origin) =>
+  typeof origin === "string" ? origin.replace(/\/+$/, "") : origin;
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
-    exposedHeaders: ["X-CSRF-Token"], // Allow frontend to read CSRF token header
-    optionsSuccessStatus: 200,
-  }),
-);
+const envAllowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",")
+      .map((url) => normalizeOrigin(url.trim()))
+      .filter(Boolean)
+  : [];
+
+const fallbackAllowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:5173",
+  "https://nine0plusstore.onrender.com",
+  /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:(3000|5173)$/, // Local network IPs in development
+  /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:(3000|5173)$/, // Local network 10.x IPs
+  /^http:\/\/172\.(1[6-9]|2[0-9]|3[01])\.\d{1,3}\.\d{1,3}:(3000|5173)$/, // Local network 172.x IPs
+];
+
+const allowedOrigins =
+  envAllowedOrigins.length > 0 ? envAllowedOrigins : fallbackAllowedOrigins;
+
+const isOriginAllowed = (origin) => {
+  const normalizedOrigin = normalizeOrigin(origin);
+  return allowedOrigins.some((allowedOrigin) => {
+    if (allowedOrigin instanceof RegExp) {
+      return allowedOrigin.test(origin);
+    }
+    return normalizeOrigin(allowedOrigin) === normalizedOrigin;
+  });
+};
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests without Origin header (curl, health checks, server-to-server).
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (isOriginAllowed(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+  exposedHeaders: ["X-CSRF-Token"], // Allow frontend to read CSRF token header
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // 10. Apply security logging
 app.use(securityLoggingMiddleware);

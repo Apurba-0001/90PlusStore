@@ -18,26 +18,30 @@ const API_BASE_URL = getApiUrl();
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // Add token to requests and handle CSRF tokens
 apiClient.interceptors.request.use((config) => {
+  const method = config.method?.toUpperCase();
+
   // Add authorization token if available
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  // Only set JSON content-type on methods that send a body.
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    config.headers["Content-Type"] = "application/json";
+  } else if (config.headers?.["Content-Type"]) {
+    delete config.headers["Content-Type"];
+  }
+
   // Add CSRF token for mutating requests (POST, PUT, PATCH, DELETE)
-  if (
-    ["POST", "PUT", "PATCH", "DELETE"].includes(config.method?.toUpperCase())
-  ) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
     const csrfToken = localStorage.getItem("csrfToken");
     console.log(
-      `[API] Preparing ${config.method?.toUpperCase()} ${config.url}`,
+      `[API] Preparing ${method} ${config.url}`,
       `csrfToken in localStorage: ${csrfToken ? csrfToken.substring(0, 10) + "..." : "NOT FOUND"}`,
     );
 
