@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -10,14 +10,34 @@ export default function ProductCard({
   hideAddToCart = false,
   isFeatured = false,
 }) {
-  const { addToCart } = useCart();
+  const { addToCart, addToCartCooldownMs } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { user } = useAuth();
+  const [isAddCooldownActive, setIsAddCooldownActive] = useState(false);
+  const cooldownTimerRef = useRef(null);
 
-  const handleAddToCart = (e) => {
+  useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleAddToCart = async (e) => {
     e.preventDefault();
-    if (user?.isAdmin) return;
-    addToCart(product, 1);
+    if (user?.isAdmin || isAddCooldownActive) return;
+
+    const added = await addToCart(product, 1);
+    if (!added) return;
+
+    setIsAddCooldownActive(true);
+    if (cooldownTimerRef.current) {
+      clearTimeout(cooldownTimerRef.current);
+    }
+    cooldownTimerRef.current = setTimeout(() => {
+      setIsAddCooldownActive(false);
+    }, addToCartCooldownMs);
   };
 
   const handleWishlist = (e) => {
@@ -31,7 +51,7 @@ export default function ProductCard({
   // Calculate discount percentage if original price exists
   const discountPercent = product.originalPrice
     ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
+        ((product.originalPrice - product.price) / product.originalPrice) * 100,
       )
     : 0;
 
@@ -129,10 +149,14 @@ export default function ProductCard({
           {!hideAddToCart && !user?.isAdmin && (
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0}
+              disabled={product.stock === 0 || isAddCooldownActive}
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 text-sm font-bold rounded-xl hover:shadow-lg transition-all disabled:bg-gray-400 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
             >
-              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+              {product.stock === 0
+                ? "Out of Stock"
+                : isAddCooldownActive
+                  ? "Please wait..."
+                  : "Add to Cart"}
             </button>
           )}
         </div>

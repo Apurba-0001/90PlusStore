@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { authService, orderService } from "../services/services";
+import { isValidAddressNameField } from "../utils/validationRules";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -29,7 +30,6 @@ export default function Profile() {
   const [popupType, setPopupType] = useState("success");
   const [showPopup, setShowPopup] = useState(false);
 
-  const isValidNameLikeField = (value) => /^[a-zA-Z\s.'-]{2,60}$/.test(value);
   const isValidZipCode = (value) => /^[a-zA-Z0-9\s-]{3,12}$/.test(value);
   const isValidStreet = (value) =>
     typeof value === "string" && value.trim().length >= 3;
@@ -76,21 +76,21 @@ export default function Profile() {
         return;
       }
 
-      if (!isValidNameLikeField(addressData.city)) {
+      if (!isValidAddressNameField(addressData.city)) {
         setPopupType("error");
         setPopupMessage("Please enter a valid city name.");
         setShowPopup(true);
         return;
       }
 
-      if (!isValidNameLikeField(addressData.state)) {
+      if (!isValidAddressNameField(addressData.state)) {
         setPopupType("error");
         setPopupMessage("Please enter a valid state name.");
         setShowPopup(true);
         return;
       }
 
-      if (!isValidNameLikeField(addressData.country)) {
+      if (!isValidAddressNameField(addressData.country)) {
         setPopupType("error");
         setPopupMessage("Please enter a valid country name.");
         setShowPopup(true);

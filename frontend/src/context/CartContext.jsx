@@ -1,13 +1,27 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { authService } from "../services/services";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
+const ADD_TO_CART_COOLDOWN_MS = 1200;
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const addCooldownRef = useRef(new Map());
+
+  const getCartItemKey = (product, size = null) => {
+    const productId = product?._id || product?.id;
+    if (!productId) return null;
+    return size ? `${productId}-${size}` : `${productId}`;
+  };
 
   // Fetch cart from server if user is logged in
   useEffect(() => {
@@ -67,19 +81,35 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product, quantity = 1, size = null) => {
     if (user?.isAdmin) {
       alert("Admins cannot add items to cart.");
-      return;
+      return false;
     }
+
+    const itemKey = getCartItemKey(product, size);
+    if (!itemKey) {
+      return false;
+    }
+
+    const now = Date.now();
+    const lastAttempt = addCooldownRef.current.get(itemKey) || 0;
+    if (now - lastAttempt < ADD_TO_CART_COOLDOWN_MS) {
+      return false;
+    }
+
+    addCooldownRef.current.set(itemKey, now);
+
     if (user) {
       try {
         await authService.addToCart(product._id, quantity, size);
         await fetchCart();
+        return true;
       } catch (error) {
         console.error("Error adding to cart:", error);
+        addCooldownRef.current.delete(itemKey);
+        return false;
       }
     } else {
       // Local storage for non-logged-in users
       setCart((prevCart) => {
-        const itemKey = size ? `${product._id}-${size}` : product._id;
         const existingItem = prevCart.find(
           (item) => item.id === product._id && (!size || item.size === size),
         );
@@ -102,6 +132,7 @@ export const CartProvider = ({ children }) => {
           },
         ];
       });
+      return true;
     }
   };
 
@@ -195,6 +226,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         clearCart,
         syncCart,
+        addToCartCooldownMs: ADD_TO_CART_COOLDOWN_MS,
         getTotalPrice,
         getTotalItems,
       }}

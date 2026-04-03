@@ -201,6 +201,18 @@ export const searchRateLimiter = createRateLimiter(
   (req) => `search:${req.ip}`,
 );
 
+export const contactRateLimiter = createRateLimiter(
+  5, // 5 contact submissions
+  900, // per 15 minutes
+  (req) => {
+    const normalizedEmail = String(req.body?.email || "")
+      .trim()
+      .toLowerCase();
+
+    return `contact:${req.ip}:${normalizedEmail || "anonymous"}`;
+  },
+);
+
 // Initialize Redis on module load
 initRedis();
 

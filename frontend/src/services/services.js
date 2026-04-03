@@ -25,7 +25,8 @@ export const authService = {
 
   // Wishlist endpoints
   getWishlist: () => apiClient.get("/auth/wishlist"),
-  toggleWishlist: (productId) => apiClient.patch(`/auth/wishlist/${productId}`),
+  toggleWishlist: (productId) =>
+    apiClient.patch(`/auth/wishlist/${productId}`, {}),
 
   logout: () => {
     // Clear all localStorage data
@@ -51,7 +52,7 @@ export const productService = {
 
   deleteProduct: (id) => apiClient.delete(`/products/${id}`),
 
-  toggleFeatured: (id) => apiClient.patch(`/products/${id}/featured`),
+  toggleFeatured: (id) => apiClient.patch(`/products/${id}/featured`, {}),
 
   // Review endpoints
   getProductReviews: (id) => apiClient.get(`/products/${id}/reviews`),
@@ -90,4 +91,8 @@ export const settingsService = {
   getSettings: () => apiClient.get("/settings"),
 
   updateSettings: (data) => apiClient.put("/settings", data),
+};
+
+export const contactService = {
+  sendMessage: (data) => apiClient.post("/contact", data),
 };

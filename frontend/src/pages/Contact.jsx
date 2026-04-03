@@ -1,7 +1,113 @@
-import React, { useState } from "react";
-import emailjs from "@emailjs/browser";
+import React, { useEffect, useState } from "react";
+import { contactService } from "../services/services";
+import { useAuth } from "../context/AuthContext";
+import { isValidContactName } from "../utils/validationRules";
+
+const CONTACT_RATE_LIMIT_KEY = "contact_form_rate_limit_v1";
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 3;
+const RATE_LIMIT_MIN_INTERVAL_MS = 60 * 1000;
+
+function sanitizeTextInput(
+  value,
+  { maxLength = 500, allowLineBreaks = false } = {},
+) {
+  if (typeof value !== "string") return "";
+
+  let sanitized = value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/[<>`]/g, "")
+    .replace(/\u0000/g, "");
+
+  if (allowLineBreaks) {
+    sanitized = sanitized.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n");
+  } else {
+    sanitized = sanitized.replace(/\s+/g, " ");
+  }
+
+  return sanitized.trim().slice(0, maxLength);
+}
+
+function sanitizeEmailInput(value) {
+  return sanitizeTextInput(value, { maxLength: 254 }).toLowerCase();
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+}
+
+function isValidContactSubject(value) {
+  return /^[^<>`]+$/.test(value);
+}
+
+function isValidContactMessage(value) {
+  return /^[^<>`]+$/.test(value);
+}
+
+function getRateLimitSnapshot(now = Date.now()) {
+  try {
+    const raw = localStorage.getItem(CONTACT_RATE_LIMIT_KEY);
+    const parsed = raw ? JSON.parse(raw) : { attempts: [] };
+    const attempts = Array.isArray(parsed.attempts)
+      ? parsed.attempts.filter(
+          (timestamp) =>
+            Number.isFinite(timestamp) &&
+            now - timestamp < RATE_LIMIT_WINDOW_MS,
+        )
+      : [];
+
+    const lastAttempt = attempts[attempts.length - 1] ?? null;
+    if (lastAttempt && now - lastAttempt < RATE_LIMIT_MIN_INTERVAL_MS) {
+      return {
+        allowed: false,
+        retryAfterMs: RATE_LIMIT_MIN_INTERVAL_MS - (now - lastAttempt),
+        attempts,
+      };
+    }
+
+    if (attempts.length >= RATE_LIMIT_MAX_REQUESTS) {
+      const oldestAttempt = attempts[0];
+      return {
+        allowed: false,
+        retryAfterMs: RATE_LIMIT_WINDOW_MS - (now - oldestAttempt),
+        attempts,
+      };
+    }
+
+    return { allowed: true, retryAfterMs: 0, attempts };
+  } catch {
+    return { allowed: true, retryAfterMs: 0, attempts: [] };
+  }
+}
+
+function registerRateLimitAttempt(now = Date.now()) {
+  const snapshot = getRateLimitSnapshot(now);
+  const updatedAttempts = [...snapshot.attempts, now];
+
+  try {
+    localStorage.setItem(
+      CONTACT_RATE_LIMIT_KEY,
+      JSON.stringify({
+        attempts: updatedAttempts,
+      }),
+    );
+  } catch {
+    // Ignore persistence errors; submit flow should continue.
+  }
+}
+
+function formatRetryAfter(ms) {
+  const totalSeconds = Math.max(1, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes === 0) return `${seconds}s`;
+  if (seconds === 0) return `${minutes}m`;
+  return `${minutes}m ${seconds}s`;
+}
 
 export default function Contact() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -10,30 +116,114 @@ export default function Contact() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    if (!user) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || user.name || "",
+      email: prev.email || user.email || "",
+    }));
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errorMessage) setErrorMessage("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isSending) return;
-    setIsSending(true);
 
-    emailjs
-      .send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        {
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-        },
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      )
+    setSubmitted(false);
+    setErrorMessage("");
+
+    if (!user) {
+      setErrorMessage("Please log in to send a message.");
+      return;
+    }
+
+    const rateLimit = getRateLimitSnapshot();
+    if (!rateLimit.allowed) {
+      setErrorMessage(
+        `Too many attempts. Please wait ${formatRetryAfter(rateLimit.retryAfterMs)} before sending again.`,
+      );
+      return;
+    }
+
+    const sanitizedData = {
+      name: sanitizeTextInput(formData.name, { maxLength: 80 }),
+      email: sanitizeEmailInput(formData.email),
+      subject: sanitizeTextInput(formData.subject, { maxLength: 120 }),
+      message: sanitizeTextInput(formData.message, {
+        maxLength: 2000,
+        allowLineBreaks: true,
+      }),
+    };
+
+    if (
+      !sanitizedData.name ||
+      !sanitizedData.subject ||
+      !sanitizedData.message
+    ) {
+      setErrorMessage("Please fill in all required fields.");
+      return;
+    }
+
+    if (sanitizedData.name.length < 2 || sanitizedData.name.length > 80) {
+      setErrorMessage("Name must be between 2 and 80 characters.");
+      return;
+    }
+
+    if (!isValidContactName(sanitizedData.name)) {
+      setErrorMessage("Name can only include English letters and spaces.");
+      return;
+    }
+
+    if (!isValidEmail(sanitizedData.email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (
+      sanitizedData.subject.length < 3 ||
+      sanitizedData.subject.length > 120
+    ) {
+      setErrorMessage("Subject must be between 3 and 120 characters.");
+      return;
+    }
+
+    if (!isValidContactSubject(sanitizedData.subject)) {
+      setErrorMessage("Subject contains invalid characters.");
+      return;
+    }
+
+    if (
+      sanitizedData.message.length < 10 ||
+      sanitizedData.message.length > 2000
+    ) {
+      setErrorMessage("Message must be between 10 and 2000 characters.");
+      return;
+    }
+
+    if (!isValidContactMessage(sanitizedData.message)) {
+      setErrorMessage("Message contains invalid characters.");
+      return;
+    }
+
+    setIsSending(true);
+    registerRateLimitAttempt();
+
+    contactService
+      .sendMessage({
+        name: sanitizedData.name,
+        email: sanitizedData.email,
+        subject: sanitizedData.subject,
+        message: sanitizedData.message,
+      })
       .then(
         () => {
           setSubmitted(true);
@@ -46,9 +236,28 @@ export default function Contact() {
           setTimeout(() => setSubmitted(false), 5000);
         },
         (error) => {
-          console.error("EmailJS Error:", error);
-          alert("Message failed. Please try again.");
-        }
+          const status = error?.response?.status;
+          const serverMessage = error?.response?.data?.message;
+          const validationErrors = error?.response?.data?.errors;
+          const validationMessage = Array.isArray(validationErrors)
+            ? validationErrors
+                .map((item) => item?.message)
+                .filter(Boolean)
+                .join(" ")
+            : "";
+
+          console.error("Contact API Error:", {
+            status,
+            message: serverMessage || error?.message,
+            errors: validationErrors,
+          });
+
+          setErrorMessage(
+            validationMessage ||
+              serverMessage ||
+              "Message failed. Please try again in a moment.",
+          );
+        },
       )
       .finally(() => {
         setIsSending(false);
@@ -187,7 +396,32 @@ export default function Contact() {
               </div>
             )}
 
+            {errorMessage && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+                <div className="bg-red-100 p-1 rounded-full">
+                  <svg
+                    className="w-4 h-4 text-red-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-10.5a.75.75 0 00-1.5 0v3a.75.75 0 001.5 0v-3zM10 13.5a1 1 0 100 2 1 1 0 000-2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <p className="text-red-800 font-medium">{errorMessage}</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
+              {!user && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 font-medium">
+                  Please log in to send us a message.
+                </div>
+              )}
+
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">
                   Name
@@ -197,8 +431,14 @@ export default function Contact() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
+                  readOnly={Boolean(user)}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  maxLength={80}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                    user
+                      ? "bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+                      : "border-gray-200"
+                  }`}
                   placeholder="Your name"
                 />
               </div>
@@ -212,8 +452,14 @@ export default function Contact() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  readOnly={Boolean(user)}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  maxLength={254}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                    user
+                      ? "bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+                      : "border-gray-200"
+                  }`}
                   placeholder="your@email.com"
                 />
               </div>
@@ -228,6 +474,7 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleChange}
                   required
+                  maxLength={120}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   placeholder="How can we help?"
                 />
@@ -242,6 +489,7 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleChange}
                   required
+                  maxLength={2000}
                   rows="5"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                   placeholder="Your message..."
@@ -250,8 +498,12 @@ export default function Contact() {
 
               <button
                 type="submit"
-                disabled={isSending}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                disabled={isSending || !user}
+                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                  isSending || !user
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25"
+                }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -266,7 +518,11 @@ export default function Contact() {
                     d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                   />
                 </svg>
-                Send Message
+                {isSending
+                  ? "Sending..."
+                  : user
+                    ? "Send Message"
+                    : "Login Required"}
               </button>
             </form>
           </div>

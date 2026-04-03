@@ -4,6 +4,10 @@
  */
 
 import { body, validationResult, query, param } from "express-validator";
+import {
+  CONTACT_NAME_REGEX,
+  ENGLISH_LETTERS_AND_SPACES_REGEX,
+} from "../utils/validationRules.js";
 
 /**
  * Sanitize and validate email
@@ -57,11 +61,41 @@ export const validateName = body("name")
   .trim()
   .isLength({ min: 2, max: 100 })
   .withMessage("Name must be between 2 and 100 characters")
-  .matches(/^[a-zA-Z\s'-]+$/)
-  .withMessage(
-    "Name can only contain letters, spaces, hyphens, and apostrophes",
-  )
+  .matches(ENGLISH_LETTERS_AND_SPACES_REGEX)
+  .withMessage("Name can only include English letters and spaces")
   .escape();
+
+/**
+ * Validate and sanitize contact form name
+ */
+export const validateContactName = body("name")
+  .trim()
+  .isLength({ min: 2, max: 80 })
+  .withMessage("Name must be between 2 and 80 characters")
+  .matches(CONTACT_NAME_REGEX)
+  .withMessage("Name can only include English letters and spaces")
+  .escape();
+
+/**
+ * Validate and sanitize contact form subject
+ */
+export const validateContactSubject = body("subject")
+  .trim()
+  .isLength({ min: 3, max: 120 })
+  .withMessage("Subject must be between 3 and 120 characters")
+  .matches(/^[^<>`]+$/)
+  .withMessage("Subject contains invalid characters")
+  .escape();
+
+/**
+ * Validate and sanitize contact form message
+ */
+export const validateContactMessage = body("message")
+  .trim()
+  .isLength({ min: 10, max: 2000 })
+  .withMessage("Message must be between 10 and 2000 characters")
+  .matches(/^[^<>`]+$/)
+  .withMessage("Message contains invalid characters");
 
 /**
  * Validate product price (no negative, reasonable limits)

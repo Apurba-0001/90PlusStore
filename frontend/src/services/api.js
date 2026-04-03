@@ -20,6 +20,27 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });
 
+const MUTATING_METHODS = ["POST", "PUT", "PATCH", "DELETE"];
+const API_DEBUG_ENABLED =
+  import.meta.env.DEV || import.meta.env.VITE_API_DEBUG === "true";
+
+const logDebug = (...args) => {
+  if (API_DEBUG_ENABLED) {
+    console.log(...args);
+  }
+};
+
+const shouldExpectCsrfTokenInResponse = (method, url = "") => {
+  if (MUTATING_METHODS.includes(method)) {
+    return true;
+  }
+
+  // CSRF tokens are commonly issued by auth/token endpoints, including GET token refresh.
+  return ["/auth/login", "/auth/register", "/auth/csrf-token"].some((path) =>
+    url.includes(path),
+  );
+};
+
 // Add token to requests and handle CSRF tokens
 apiClient.interceptors.request.use((config) => {
   const method = config.method?.toUpperCase();
@@ -30,24 +51,28 @@ apiClient.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Only set JSON content-type on methods that send a body.
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+  // Only set JSON content-type when the request actually has a body.
+  if (
+    MUTATING_METHODS.includes(method) &&
+    config.data !== undefined &&
+    config.data !== null
+  ) {
     config.headers["Content-Type"] = "application/json";
   } else if (config.headers?.["Content-Type"]) {
     delete config.headers["Content-Type"];
   }
 
   // Add CSRF token for mutating requests (POST, PUT, PATCH, DELETE)
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+  if (MUTATING_METHODS.includes(method)) {
     const csrfToken = localStorage.getItem("csrfToken");
-    console.log(
+    logDebug(
       `[API] Preparing ${method} ${config.url}`,
       `csrfToken in localStorage: ${csrfToken ? csrfToken.substring(0, 10) + "..." : "NOT FOUND"}`,
     );
 
     if (csrfToken) {
       config.headers["X-CSRF-Token"] = csrfToken;
-      console.log(
+      logDebug(
         `[API] ✓ Set X-CSRF-Token header: ${csrfToken.substring(0, 10)}...`,
       );
     } else {
@@ -65,7 +90,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => {
     // Log all response headers for debugging
-    console.log(
+    logDebug(
       `[API] Response headers for ${response.config.method.toUpperCase()} ${response.config.url}:`,
       response.headers,
     );
@@ -79,7 +104,7 @@ apiClient.interceptors.response.use(
 
     // Also check response body immediately
     if (!csrfToken && response.data) {
-      console.log(
+      logDebug(
         `[API] Response body for ${response.config.method.toUpperCase()} ${response.config.url}:`,
         response.data,
       );
@@ -88,10 +113,13 @@ apiClient.interceptors.response.use(
 
     if (csrfToken) {
       localStorage.setItem("csrfToken", csrfToken);
-      console.log(
-        `[API] ✓ Stored CSRF token (${csrfToken.substring(0, 10)}...)`,
-      );
-    } else {
+      logDebug(`[API] ✓ Stored CSRF token (${csrfToken.substring(0, 10)}...)`);
+    } else if (
+      shouldExpectCsrfTokenInResponse(
+        response.config.method.toUpperCase(),
+        response.config.url,
+      )
+    ) {
       console.warn(
         `[API] ⚠ No CSRF token found in response for ${response.config.method.toUpperCase()} ${response.config.url}`,
       );

@@ -7,6 +7,7 @@ import {
 } from "../services/services";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { isValidAddressNameField } from "../utils/validationRules";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -273,7 +274,6 @@ export default function Checkout() {
     navigate(path);
   };
 
-  const isValidNameLikeField = (value) => /^[a-zA-Z\s.'-]{2,60}$/.test(value);
   const isValidZipCode = (value) => /^[a-zA-Z0-9\s-]{3,12}$/.test(value);
   const isValidStreet = (value) =>
     typeof value === "string" && value.trim().length >= 3;
@@ -330,19 +330,19 @@ export default function Checkout() {
         return;
       }
 
-      if (!isValidNameLikeField(formData.city)) {
+      if (!isValidAddressNameField(formData.city)) {
         setError("Please enter a valid city name");
         setLoading(false);
         return;
       }
 
-      if (!isValidNameLikeField(formData.state)) {
+      if (!isValidAddressNameField(formData.state)) {
         setError("Please enter a valid state name");
         setLoading(false);
         return;
       }
 
-      if (!isValidNameLikeField(formData.country)) {
+      if (!isValidAddressNameField(formData.country)) {
         setError("Please enter a valid country name");
         setLoading(false);
         return;
@@ -361,7 +361,10 @@ export default function Checkout() {
         return;
       }
 
-      if (formData.billingCity && !isValidNameLikeField(formData.billingCity)) {
+      if (
+        formData.billingCity &&
+        !isValidAddressNameField(formData.billingCity)
+      ) {
         setError("Please enter a valid billing city name");
         setLoading(false);
         return;
@@ -369,7 +372,7 @@ export default function Checkout() {
 
       if (
         formData.billingState &&
-        !isValidNameLikeField(formData.billingState)
+        !isValidAddressNameField(formData.billingState)
       ) {
         setError("Please enter a valid billing state name");
         setLoading(false);
@@ -378,7 +381,7 @@ export default function Checkout() {
 
       if (
         formData.billingCountry &&
-        !isValidNameLikeField(formData.billingCountry)
+        !isValidAddressNameField(formData.billingCountry)
       ) {
         setError("Please enter a valid billing country name");
         setLoading(false);

@@ -44,6 +44,10 @@ import {
   logPasswordChange,
 } from "../middleware/securityLogging.js";
 import { generateCsrfToken } from "../middleware/csrfProtection.js";
+import {
+  isValidAddressNameField,
+  isValidNameField,
+} from "../utils/validationRules.js";
 
 /**
  * Validate password strength
@@ -71,7 +75,6 @@ const validatePasswordStrength = (password) => {
   return { valid: true };
 };
 
-const NAME_LIKE_REGEX = /^[a-zA-Z\s.'-]{2,60}$/;
 const ZIP_CODE_REGEX = /^[a-zA-Z0-9\s-]{3,12}$/;
 const COUNTRY_CODE_REGEX = /^\+[0-9]{1,4}$/;
 
@@ -91,10 +94,10 @@ export const register = async (req, res) => {
     }
 
     // Validate name format
-    if (!/^[a-zA-Z\s'-]+$/.test(name) || name.length < 2 || name.length > 100) {
+    if (!isValidNameField(name)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid name format",
+        message: "Name can only include English letters and spaces",
       });
     }
 
@@ -289,11 +292,10 @@ export const updateProfile = async (req, res) => {
       user.email = normalizedEmail;
     }
 
-    if (
-      name !== undefined &&
-      (!/^[a-zA-Z\s'-]{2,100}$/.test(name.trim()) || name.trim().length > 100)
-    ) {
-      return res.status(400).json({ message: "Invalid name format" });
+    if (name !== undefined && !isValidNameField(name)) {
+      return res
+        .status(400)
+        .json({ message: "Name can only include English letters and spaces" });
     }
 
     const normalizedPhone =
@@ -325,21 +327,21 @@ export const updateProfile = async (req, res) => {
 
       if (
         address.city !== undefined &&
-        !NAME_LIKE_REGEX.test(String(address.city).trim())
+        !isValidAddressNameField(String(address.city))
       ) {
         return res.status(400).json({ message: "Invalid city" });
       }
 
       if (
         address.state !== undefined &&
-        !NAME_LIKE_REGEX.test(String(address.state).trim())
+        !isValidAddressNameField(String(address.state))
       ) {
         return res.status(400).json({ message: "Invalid state" });
       }
 
       if (
         address.country !== undefined &&
-        !NAME_LIKE_REGEX.test(String(address.country).trim())
+        !isValidAddressNameField(String(address.country))
       ) {
         return res.status(400).json({ message: "Invalid country" });
       }

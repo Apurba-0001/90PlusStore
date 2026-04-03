@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { isValidNameField } from "../utils/validationRules";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -46,6 +47,11 @@ export default function Register() {
 
     if (formData.password !== formData.confirmPassword) {
       setValidationError("Passwords do not match");
+      return;
+    }
+
+    if (!isValidNameField(formData.name)) {
+      setValidationError("Name can only include English letters and spaces");
       return;
     }
 
@@ -103,6 +109,7 @@ export default function Register() {
                 value={formData.name}
                 onChange={handleChange}
                 required
+                maxLength={100}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition bg-gray-50 hover:bg-white"
                 placeholder="John Doe"
               />

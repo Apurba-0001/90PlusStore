@@ -22,6 +22,7 @@ import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 import { errorHandler, authMiddleware } from "./middleware/auth.js";
 import { connectRedis } from "./config/redis.js";
 import { securityHeaders } from "./middleware/securityHeaders.js";
@@ -176,6 +177,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/contact", contactRoutes);
 
 // ============================================================================
 // 404 Handler

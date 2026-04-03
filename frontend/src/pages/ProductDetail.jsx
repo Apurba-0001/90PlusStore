@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { productService, authService } from "../services/services";
 import { useCart } from "../context/CartContext";
@@ -11,7 +11,7 @@ const minSwipeDistance = 50;
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { addToCart } = useCart();
+  const { addToCart, addToCartCooldownMs } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { user } = useAuth();
   const [product, setProduct] = useState(null);
@@ -36,8 +36,10 @@ export default function ProductDetail() {
   const [adminReviewError, setAdminReviewError] = useState("");
   const [adminReviewSaving, setAdminReviewSaving] = useState(false);
   const [reviewSort, setReviewSort] = useState("newest");
+  const [isAddCooldownActive, setIsAddCooldownActive] = useState(false);
+  const addCooldownTimerRef = useRef(null);
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1024
+    typeof window !== "undefined" ? window.innerWidth : 1024,
   );
 
   // Dynamic similar products count based on screen size
@@ -58,6 +60,14 @@ export default function ProductDetail() {
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (addCooldownTimerRef.current) {
+        clearTimeout(addCooldownTimerRef.current);
+      }
+    };
   }, []);
 
   // Categories that require size selection (all except Accessories and Special Collectibles)
@@ -120,14 +130,14 @@ export default function ProductDetail() {
     if (isLeftSwipe && product?.images) {
       // Swipe left - next image
       setCurrentImageIndex((prev) =>
-        prev === product.images.length - 1 ? 0 : prev + 1
+        prev === product.images.length - 1 ? 0 : prev + 1,
       );
     }
 
     if (isRightSwipe && product?.images) {
       // Swipe right - previous image
       setCurrentImageIndex((prev) =>
-        prev === 0 ? product.images.length - 1 : prev - 1
+        prev === 0 ? product.images.length - 1 : prev - 1,
       );
     }
   };
@@ -148,14 +158,14 @@ export default function ProductDetail() {
             undefined,
             1,
             undefined,
-            1000 // Request all products with high limit
+            1000, // Request all products with high limit
           );
           const products =
             allProductsRes.data.products || allProductsRes.data || [];
           const sameCategoryProducts = products.filter(
             (p) =>
               p.category === response.data.category &&
-              p._id !== response.data._id
+              p._id !== response.data._id,
           );
           setRelatedProducts(sameCategoryProducts);
         }
@@ -174,11 +184,13 @@ export default function ProductDetail() {
       const reviewsRes = await productService.getProductReviews(id);
       setReviews(reviewsRes.data.reviews || []);
       setProduct((prev) =>
-        prev ? { ...prev, rating: reviewsRes.data.rating ?? prev.rating } : prev
+        prev
+          ? { ...prev, rating: reviewsRes.data.rating ?? prev.rating }
+          : prev,
       );
     } catch (err) {
       setAdminReviewError(
-        err?.response?.data?.message || "Failed to refresh reviews"
+        err?.response?.data?.message || "Failed to refresh reviews",
       );
     }
   };
@@ -189,7 +201,7 @@ export default function ProductDetail() {
       case "oldest":
         return list.sort(
           (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         );
       case "rating-high":
         return list.sort((a, b) => {
@@ -213,14 +225,17 @@ export default function ProductDetail() {
       default:
         return list.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
     }
   }, [reviews, reviewSort]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (user?.isAdmin) {
       alert("Admins cannot add to cart.");
+      return;
+    }
+    if (isAddCooldownActive) {
       return;
     }
     if (requiresSize && !selectedSize) {
@@ -229,7 +244,17 @@ export default function ProductDetail() {
       return;
     }
     setSizeError("");
-    addToCart(product, quantity, selectedSize || null);
+    const added = await addToCart(product, quantity, selectedSize || null);
+    if (!added) return;
+
+    setIsAddCooldownActive(true);
+    if (addCooldownTimerRef.current) {
+      clearTimeout(addCooldownTimerRef.current);
+    }
+    addCooldownTimerRef.current = setTimeout(() => {
+      setIsAddCooldownActive(false);
+    }, addToCartCooldownMs);
+
     setSelectedSize("");
   };
 
@@ -319,14 +344,14 @@ export default function ProductDetail() {
         product._id,
         editingReviewId,
         editRating,
-        editComment
+        editComment,
       );
       await refreshReviews();
       cancelEditReview();
     } catch (err) {
       setAdminReviewError(
         err?.response?.data?.message ||
-          "Failed to update review. Please try again."
+          "Failed to update review. Please try again.",
       );
     } finally {
       setAdminReviewSaving(false);
@@ -345,7 +370,7 @@ export default function ProductDetail() {
     } catch (err) {
       setAdminReviewError(
         err?.response?.data?.message ||
-          "Failed to delete review. Please try again."
+          "Failed to delete review. Please try again.",
       );
     } finally {
       setAdminReviewSaving(false);
@@ -474,7 +499,7 @@ export default function ProductDetail() {
                       <button
                         onClick={() =>
                           setCurrentImageIndex((prev) =>
-                            prev === 0 ? product.images.length - 1 : prev - 1
+                            prev === 0 ? product.images.length - 1 : prev - 1,
                           )
                         }
                         className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
@@ -497,7 +522,7 @@ export default function ProductDetail() {
                       <button
                         onClick={() =>
                           setCurrentImageIndex((prev) =>
-                            prev === product.images.length - 1 ? 0 : prev + 1
+                            prev === product.images.length - 1 ? 0 : prev + 1,
                           )
                         }
                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
@@ -657,7 +682,7 @@ export default function ProductDetail() {
                         onChange={(e) => {
                           const value = parseInt(e.target.value) || 1;
                           setQuantity(
-                            Math.min(Math.max(1, value), product.stock)
+                            Math.min(Math.max(1, value), product.stock),
                           );
                         }}
                         max={product.stock}
@@ -701,8 +726,8 @@ export default function ProductDetail() {
                                 selectedSize === size
                                   ? "border-blue-600 bg-blue-50 text-blue-600"
                                   : available
-                                  ? "border-gray-300 hover:border-blue-400"
-                                  : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    ? "border-gray-300 hover:border-blue-400"
+                                    : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                               } ${
                                 sizeError && !selectedSize
                                   ? "ring-2 ring-red-300"
@@ -733,10 +758,10 @@ export default function ProductDetail() {
             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl px-4">
               <button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
+                disabled={product.stock === 0 || isAddCooldownActive}
                 className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-bold hover:bg-blue-700 transition disabled:bg-gray-400 text-base shadow-lg"
               >
-                Add to Cart
+                {isAddCooldownActive ? "Please wait..." : "Add to Cart"}
               </button>
               <button
                 onClick={handleAddToWishlist}

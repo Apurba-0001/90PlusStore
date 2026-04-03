@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import { isValidAddressNameField } from "../utils/validationRules.js";
 
 const maskUpiId = (upiId) => {
   if (typeof upiId !== "string" || !upiId.includes("@")) {
@@ -16,7 +17,6 @@ const maskUpiId = (upiId) => {
   return `${prefix}${maskedMiddle}${suffix}@${provider}`;
 };
 
-const NAME_LIKE_REGEX = /^[a-zA-Z\s.'-]{2,60}$/;
 const ZIP_CODE_REGEX = /^[a-zA-Z0-9\s-]{3,12}$/;
 const UPI_REGEX = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
 
@@ -28,15 +28,15 @@ const validateAddress = (address, label) => {
     return `${label} street is invalid`;
   }
 
-  if (!NAME_LIKE_REGEX.test(String(address?.city || "").trim())) {
+  if (!isValidAddressNameField(String(address?.city || ""))) {
     return `${label} city is invalid`;
   }
 
-  if (!NAME_LIKE_REGEX.test(String(address?.state || "").trim())) {
+  if (!isValidAddressNameField(String(address?.state || ""))) {
     return `${label} state is invalid`;
   }
 
-  if (!NAME_LIKE_REGEX.test(String(address?.country || "").trim())) {
+  if (!isValidAddressNameField(String(address?.country || ""))) {
     return `${label} country is invalid`;
   }
 

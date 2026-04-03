@@ -132,6 +132,28 @@ _Designed for scalability, security, and optimal user experience across all devi
 
 ---
 
+## ✅ Validation Rules (Frontend + Backend Synced)
+
+These input constraints are intentionally kept identical in both apps to avoid false positives in UI and 400 errors from API validation.
+
+### Name Fields
+
+- **name** (register/profile/admin): English letters and spaces only, length **2-100**
+- **contact name** (contact form): English letters and spaces only, length **2-80**
+
+### Address Text Fields
+
+- **city**, **state**, **country**: English letters and spaces only, length **2-60**
+
+### Source Of Truth
+
+- Backend rules live in: `backend/utils/validationRules.js`
+- Frontend rules live in: `frontend/src/utils/validationRules.js`
+
+When changing any validation constraint, update both files in the same commit.
+
+---
+
 ## 🎯 Getting Started
 
 ### 1️⃣ Repository Setup

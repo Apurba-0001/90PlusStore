@@ -63,12 +63,12 @@ export default function AdminProducts() {
   const handleToggleFeatured = async (id) => {
     try {
       const response = await productService.toggleFeatured(id);
-      // Update product in list
-      setProducts(
-        products.map((p) =>
-          p._id === id
-            ? { ...p, isFeatured: response.data.product.isFeatured }
-            : p,
+      const updatedIsFeatured = response.data?.product?.isFeatured;
+
+      // Update product in list using the latest state so the button re-renders immediately.
+      setProducts((currentProducts) =>
+        currentProducts.map((p) =>
+          p._id === id ? { ...p, isFeatured: updatedIsFeatured } : p,
         ),
       );
       alert(response.data.message);
