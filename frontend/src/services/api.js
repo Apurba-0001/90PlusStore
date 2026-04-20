@@ -1,14 +1,46 @@
 import axios from "axios";
 
+const normalizeApiUrl = (rawUrl) => {
+  if (typeof rawUrl !== "string") return "";
+
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return "";
+
+  // Avoid browser redirect from HTTP to HTTPS, which can convert POST into GET on some hosts.
+  const protocolSafeUrl =
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    trimmed.startsWith("http://")
+      ? `https://${trimmed.slice("http://".length)}`
+      : trimmed;
+
+  if (/^https?:\/\//i.test(protocolSafeUrl)) {
+    try {
+      const parsed = new URL(protocolSafeUrl);
+      const cleanPath = parsed.pathname.replace(/\/+$/, "");
+
+      // This codebase mounts all API routes under /api.
+      parsed.pathname = cleanPath && cleanPath !== "/" ? cleanPath : "/api";
+      return `${parsed.origin}${parsed.pathname}`;
+    } catch {
+      return protocolSafeUrl.replace(/\/+$/, "");
+    }
+  }
+
+  return protocolSafeUrl.replace(/\/+$/, "");
+};
+
 // Smart API URL detection
 const getApiUrl = () => {
   // If VITE_API_URL is set, use it (for local dev/mobile testing)
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+    return normalizeApiUrl(import.meta.env.VITE_API_URL);
   }
 
-  // Production: use relative path (works when frontend and backend are on same domain)
-  // Or use current host with /api (works with proxy)
+  // Production: use relative API path on same domain.
+  if (import.meta.env.PROD) {
+    return "/api";
+  }
 
   // Development fallback
   return "http://localhost:5000/api";

@@ -28,4 +28,13 @@ router.post(
   sendContactMessage,
 );
 
+router.get("/", (req, res) => {
+  res.status(405).json({
+    success: false,
+    message: "Method not allowed. Use POST /api/contact to send a message.",
+    method: req.method,
+    path: req.originalUrl,
+  });
+});
+
 export default router;
