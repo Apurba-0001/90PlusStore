@@ -178,7 +178,7 @@ npm install
 cp .env.example .env
 
 # Update .env with your credentials:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/90plusstore
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/test
 # JWT_SECRET=your_super_secret_key
 # NODE_ENV=development
 
@@ -207,40 +207,6 @@ npm run dev
 ```
 
 **Frontend runs on**: `http://localhost:3000`
-
----
-
-## 🔌 API Reference
-
-### 🔐 Authentication Endpoints
-
-| Method | Endpoint             | Description             | Auth Required |
-| ------ | -------------------- | ----------------------- | ------------- |
-| POST   | `/api/auth/register` | Create new user account | No            |
-| POST   | `/api/auth/login`    | Authenticate user       | No            |
-| GET    | `/api/auth/profile`  | Retrieve user profile   | Yes           |
-| PUT    | `/api/auth/profile`  | Update user profile     | Yes           |
-
-### 📦 Product Endpoints
-
-| Method | Endpoint                   | Description                  | Auth Required |
-| ------ | -------------------------- | ---------------------------- | ------------- |
-| GET    | `/api/products`            | Get all products (paginated) | No            |
-| GET    | `/api/products/:id`        | Get product details          | No            |
-| GET    | `/api/products/categories` | Get product categories       | No            |
-| POST   | `/api/products`            | Create new product           | Yes (Admin)   |
-| PUT    | `/api/products/:id`        | Update product               | Yes (Admin)   |
-| DELETE | `/api/products/:id`        | Delete product               | Yes (Admin)   |
-
-### 📋 Order Endpoints
-
-| Method | Endpoint                       | Description         | Auth Required |
-| ------ | ------------------------------ | ------------------- | ------------- |
-| POST   | `/api/orders`                  | Create new order    | Yes           |
-| GET    | `/api/orders/my-orders`        | Get user orders     | Yes           |
-| GET    | `/api/orders/:id`              | Get order details   | Yes           |
-| PUT    | `/api/orders/:id/status`       | Update order status | Yes (Admin)   |
-| GET    | `/api/orders/admin/all-orders` | Get all orders      | Yes (Admin)   |
 
 ---
 
@@ -354,7 +320,7 @@ npm run preview  # Preview production build locally
 ### 🔐 Backend Environment Variables (`.env`)
 
 ```env
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/90plusstore
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/hbujio
 JWT_SECRET=your_super_secret_jwt_key_change_in_production
 PORT=5000
 NODE_ENV=production
@@ -510,13 +476,6 @@ Future enhancements planned for this platform:
 - [ ] Social media login integration
 - [ ] Customer reviews and ratings
 - [ ] Inventory alerts and notifications
-- [ ] Advanced search with filters
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for detailed information.
 
 ---
 
@@ -526,8 +485,7 @@ For technical support or inquiries:
 
 - **Email**: 90plusstore0@gmail.com
 - **Issues**: Open an issue on GitHub
-- **Documentation**: See [API_DOCUMENTATION.md](API_DOCUMENTATION.md), [GETTING_STARTED.md](GETTING_STARTED.md), and [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
-
+  
 ---
 
 ## 👨‍💻 Author
